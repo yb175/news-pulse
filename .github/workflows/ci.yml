@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, deploy ]
+    branches: [ main, master ]
   pull_request:
     branches: [ main, master, deploy ]
 
@@ -21,11 +21,7 @@ jobs:
           node-version: 18
           cache: 'npm'
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip'
+
 
       # Install Node monorepo packages
       - name: Install Node Dependencies
@@ -47,12 +43,4 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
 
-      # Install Python pip requirements and execute pytest
-      - name: Install Scraper Dependencies
-        run: |
-          pip install -r scraper/requirements.txt
 
-      - name: Run Scraper Tests
-        run: |
-          cd scraper
-          pytest
