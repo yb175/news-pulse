@@ -8,10 +8,8 @@ interface TimelineItemProps {
 }
 
 export default function TimelineItem({ item, isSelected, onSelect }: TimelineItemProps) {
-  const isClustered = item.articleCount > 1;
-  
   const formatTime = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   };
   
   const formatDate = (isoString: string) => {
@@ -25,65 +23,83 @@ export default function TimelineItem({ item, isSelected, onSelect }: TimelineIte
   return (
     <div
       onClick={() => onSelect(item.clusterId)}
+      className={`paper-card ${isSelected ? 'active' : ''}`}
       style={{
-        display: 'flex',
-        gap: '20px',
         cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
         position: 'relative',
-        paddingBottom: '24px'
+        userSelect: 'none'
       }}
     >
-      {/* Visual connection line */}
-      <div style={{
-        position: 'absolute',
-        left: '119px',
-        top: '12px',
-        bottom: 0,
-        width: '2px',
-        background: 'var(--border-color)',
-        zIndex: 1
-      }}></div>
+      {/* Editorial Accent Bar (Deep Red) */}
+      {isSelected && (
+        <div style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: '4px',
+          background: 'var(--accent-red)',
+          borderRadius: '4px 0 0 4px'
+        }} />
+      )}
 
-      {/* Date & Time Range */}
-      <div style={{ width: '100px', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
-        <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
-          {startTimeStr} - {endTimeStr}
+      {/* Header Row: Date & Article Count Badge */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span className="mono-font eyebrow-red">
+          {startDateStr}
         </span>
-        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{startDateStr}</span>
+        <span className="mono-font metadata-tag">
+          {item.articleCount} {item.articleCount === 1 ? 'Article' : 'Articles'}
+        </span>
       </div>
 
-      {/* Visual node marker */}
-      <div style={{
-        width: '12px',
-        height: '12px',
-        borderRadius: '50%',
-        background: isClustered ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.2)',
-        border: isSelected ? '3px solid #ffffff' : '2px solid var(--bg-color)',
-        boxShadow: isClustered ? '0 0 8px rgba(6, 182, 212, 0.6)' : 'none',
-        marginTop: '6px',
-        zIndex: 2,
-        flexShrink: 0
-      }}></div>
-
-      {/* Content card */}
-      <div
-        className="glass-panel"
-        style={{
-          flexGrow: 1,
-          padding: '16px',
-          background: isSelected ? 'rgba(59, 130, 246, 0.08)' : 'var(--panel-bg)',
-          borderColor: isSelected ? 'var(--accent-blue)' : 'var(--border-color)',
-          transform: isSelected ? 'scale(1.01)' : 'none',
-          boxShadow: isSelected ? '0 4px 20px rgba(0,0,0,0.2)' : 'none'
+      {/* Title / Topic headline */}
+      <h3 
+        style={{ 
+          fontSize: '15px', 
+          fontWeight: 700, 
+          fontFamily: 'var(--font-serif)',
+          color: 'var(--text-primary)',
+          lineHeight: '1.3',
+          margin: 0
         }}
       >
-        <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
-          {item.label}
-        </h3>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', color: 'var(--accent-cyan)' }}>
-            {item.articleCount} {item.articleCount === 1 ? 'article' : 'articles grouped'}
-          </span>
+        {item.label}
+      </h3>
+
+      {/* Footer Row: Time range & Source Badges */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginTop: '2px',
+          gap: '8px'
+        }}
+      >
+        {/* Time range */}
+        <span className="mono-font timestamp-text">
+          {startTimeStr} → {endTimeStr}
+        </span>
+
+        {/* Source Badges */}
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {item.sources && item.sources.slice(0, 3).map((source) => (
+            <span
+              key={source}
+              className="mono-font metadata-tag metadata-tag-dim"
+            >
+              {source.replace(/\s+News$/i, '')}
+            </span>
+          ))}
+          {item.sources && item.sources.length > 3 && (
+            <span className="mono-font metadata-tag metadata-tag-dim">
+              +{item.sources.length - 3}
+            </span>
+          )}
         </div>
       </div>
     </div>

@@ -1,18 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 :root {
-  --bg-color: #0d0f12;
-  --panel-bg: rgba(20, 24, 33, 0.7);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
+  --bg-color: #F8F5EE;          /* Warm Paper */
+  --surface-color: #FFFDF8;     /* Bright Paper Cards */
+  --surface-dim: #F4EFE3;       /* Sidebar background */
+  --border-color: #2B2B2B;      /* Ink Charcoal */
+  --text-primary: #2B2B2B;      /* Charcoal Text */
+  --text-secondary: #6B6B6B;    /* Muted Gray */
+  --accent-red: #B23A2A;        /* Editorial Red */
+  --accent-blue: #1D4ED8;       /* Link Blue */
   
-  /* Vibrant Accents */
-  --accent-blue: #3b82f6;
-  --accent-cyan: #06b6d4;
-  --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-  
-  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-libre-baskerville), Georgia, serif;
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
 }
 
 * {
@@ -24,49 +22,234 @@
 body {
   background-color: var(--bg-color);
   color: var(--text-primary);
-  font-family: var(--font-inter);
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  line-height: 1.6;
   overflow-x: hidden;
 }
 
-/* Premium Glassmorphism */
-.glass-panel {
-  background: var(--panel-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+h1, h2, h3, h4, .serif-font {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mono-font {
+  font-family: var(--font-mono);
+}
+
+/* Editorial Brutalism Panel Style */
+.paper-card {
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 4px;
+  padding: 16px;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.gradient-text {
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.paper-card:hover {
+  border-color: var(--text-primary);
+  background-color: #FFFDF4; /* Subtle background warm-up */
 }
 
-/* Subtle Micro-Animations */
+.paper-card.active {
+  border-color: var(--accent-red);
+  background-color: #FFFBF0; /* Slightly warmer background */
+  box-shadow: 2px 2px 0px var(--border-color); /* Subtle flat elevation */
+}
+
+/* Shimmer Loading Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #EBE8E0 25%, #F4F1EA 50%, #EBE8E0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-color);
 }
 
-/* Interactive elements */
-button, a {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+/* Responsive Grid / Stacks */
+.app-container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  height: calc(100vh - 82px);
+  overflow: hidden;
+  gap: 0px;
 }
 
-button:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+.timeline-sidebar {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.details-pane {
+  overflow-y: auto;
+  height: 100%;
+}
+
+@media (max-width: 1024px) {
+  .app-wrapper {
+    height: auto;
+    overflow: auto;
+  }
+  .app-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    overflow: auto;
+  }
+  .timeline-sidebar, .details-pane {
+    height: auto;
+    overflow: auto;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-red);
+}
+
+/* Separator rules */
+.thin-hr {
+  border: 0;
+  height: 1px;
+  background-color: var(--border-color);
+  opacity: 0.15;
+  margin: 6px 0;
+}
+
+/* Editorial Newspaper Design System Utilities */
+
+/* 1. Monospace metadata tags & badges */
+.metadata-tag {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.metadata-tag-dim {
+  background: var(--bg-color);
+  color: var(--text-secondary);
+}
+
+/* 2. Text elements & Eyebrow headers */
+.eyebrow-red {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--accent-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.eyebrow-gray {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.timestamp-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+/* 3. Interactive controls and buttons */
+.read-link {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 150ms ease;
+}
+
+.read-link:hover {
+  color: var(--accent-blue) !important;
+  text-decoration: underline !important;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 150ms ease;
+}
+
+.close-btn:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Focus and Outline Accessibility */
+button:focus, a:focus, input:focus, select:focus {
+  outline: 2px solid var(--accent-red);
+  outline-offset: 2px;
+}
+
+.page-btn {
+  height: 30px;
+  padding: 0 12px;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-weight: bold;
+  font-size: 11px;
+  transition: background-color 150ms ease, border-color 150ms ease;
 }

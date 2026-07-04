@@ -42,11 +42,10 @@ describe('Express Routing Integration', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('POST /api/ingest/trigger should trigger ingestion and return 200', async () => {
+    it('POST /api/ingest/trigger should return 403 Forbidden to block client-side triggers', async () => {
       const response = await request(app).post('/api/ingest/trigger');
-      expect(response.status).toBe(200);
-      expect(response.body.jobId).toBeDefined();
-      expect(response.body.status).toBe('queued');
+      expect(response.status).toBe(403);
+      expect(response.body.error).toBe('Ingestion can only be triggered by the backend scheduler.');
     });
   });
 

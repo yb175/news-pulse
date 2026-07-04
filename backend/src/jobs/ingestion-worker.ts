@@ -23,8 +23,8 @@ export function startIngestionWorker(): { stop: () => void } {
     }
   }
 
-  // Schedule the first execution
-  timeoutId = setTimeout(run, INTERVAL_MS);
+  // Run immediately on startup, which then schedules subsequent runs in the finally block
+  run();
 
   return {
     stop: () => {

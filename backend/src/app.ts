@@ -4,6 +4,7 @@ import timelineRouter from './routes/timeline.routes';
 import clusterRouter from './routes/cluster.routes';
 import ingestRouter from './routes/ingest.routes';
 import { errorHandler } from './middleware/error.middleware';
+import { SseService } from './services/sse.service';
 
 const app = express();
 
@@ -14,6 +15,14 @@ app.use(express.json());
 app.use('/api/timeline', timelineRouter);
 app.use('/api/clusters', clusterRouter);
 app.use('/api/ingest', ingestRouter);
+
+// Real-time Event Streaming
+app.get('/api/updates', (req, res) => {
+  SseService.addClient(res);
+  req.on('close', () => {
+    SseService.removeClient(res);
+  });
+});
 
 // Health Check
 app.get('/health', (req, res) => {
