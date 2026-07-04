@@ -244,7 +244,7 @@ npm run test
 ### Database Seeding
 Populate the development database with mock news articles and clusters (run this command from the monorepo root directory):
 ```bash
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/newspulse?schema=public" npm run db:seed
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/newspulse?schema=public" npm run seed --workspace=db
 ```
 Alternatively, run the seed script directly from the `backend/` directory via Prisma CLI:
 ```bash
