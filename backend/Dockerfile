@@ -20,6 +20,10 @@ COPY scraper/ ./scraper/
 
 # Copy Backend codebase and build TypeScript
 COPY backend/ ./backend/
+# Install OpenSSL so Prisma can detect the version at build AND runtime.
+# Alpine ships OpenSSL 3; without this, Prisma falls back to the openssl-1.1.x
+# binary (which requires libssl.so.1.1 — not present on Alpine 3.17+).
+RUN apk add --no-cache openssl
 RUN npx prisma generate --schema=db/prisma/schema.prisma
 RUN npm run build --workspace=backend
 
