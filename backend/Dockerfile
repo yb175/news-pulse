@@ -27,9 +27,13 @@ RUN apk add --no-cache openssl
 RUN npx prisma generate --schema=db/prisma/schema.prisma
 RUN npm run build --workspace=backend
 
+# Copy and prepare entrypoint
+COPY backend/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 ENV PORT=5000
 EXPOSE 5000
 
 # Set running directory to backend
 WORKDIR /app/backend
-CMD ["npm", "run", "start"]
+CMD ["/app/entrypoint.sh"]
