@@ -5,17 +5,19 @@ from utils.logger import logger
 from utils.helpers import generate_snippet
 
 class ArticleExtractor:
-    def __init__(self):
-        self.fetcher = ArticleFetcher()
+    def __init__(self, fetcher: ArticleFetcher = None):
+        self.fetcher = fetcher or ArticleFetcher()
         self.parser = HTMLParser()
 
     def extract(self, article: ArticleModel) -> ArticleModel:
         logger.info(f"Extracting full content for: {article.title}")
-        html = self.fetcher.fetch(article.url)
+        article, html = self.fetcher.fetch_article(article)
         if html:
-            body = self.parser.extract_main_text(html)
-            article.body = body
+            extracted = self.parser.extract_article(html)
+            article.body = extracted["body"]
+            if extracted["title"]:
+                article.title = extracted["title"]
             # If there was no summary or snippet from RSS, create one from body
             if not article.body_snippet:
-                article.body_snippet = generate_snippet(body, 200)
+                article.body_snippet = generate_snippet(article.body, 200)
         return article
