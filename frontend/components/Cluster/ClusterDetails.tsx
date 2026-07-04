@@ -9,6 +9,31 @@ interface ClusterDetailsProps {
   onClose: () => void;
 }
 
+const emptyDetailsStyle: React.CSSProperties = {
+  padding: '40px', 
+  display: 'flex', 
+  flexDirection: 'column',
+  justifyContent: 'center', 
+  alignItems: 'center', 
+  height: '100%', 
+  minHeight: '300px', 
+  textAlign: 'center',
+  color: 'var(--text-secondary)',
+  background: 'var(--surface-color)',
+  borderStyle: 'dashed'
+};
+
+const dismissButtonStyle: React.CSSProperties = {
+  marginTop: '16px', 
+  padding: '6px 12px', 
+  border: '1px solid var(--accent-red)', 
+  background: 'transparent', 
+  color: 'var(--accent-red)', 
+  fontWeight: 'bold',
+  borderRadius: '4px',
+  cursor: 'pointer'
+};
+
 export default function ClusterDetails({ clusterId, onClose }: ClusterDetailsProps) {
   const {
     data: cluster,
@@ -26,19 +51,7 @@ export default function ClusterDetails({ clusterId, onClose }: ClusterDetailsPro
     return (
       <div 
         className="paper-card" 
-        style={{ 
-          padding: '40px', 
-          display: 'flex', 
-          flexDirection: 'column',
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100%', 
-          minHeight: '300px', 
-          textAlign: 'center',
-          color: 'var(--text-secondary)',
-          background: 'var(--surface-color)',
-          borderStyle: 'dashed'
-        }}
+        style={emptyDetailsStyle}
       >
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: '16px', opacity: 0.5 }}>
           <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
@@ -62,17 +75,9 @@ export default function ClusterDetails({ clusterId, onClose }: ClusterDetailsPro
         <h3 className="mono-font" style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>ERROR_LOADING_CLUSTER</h3>
         <p style={{ fontSize: '14px' }}>{error instanceof Error ? error.message : 'Could not fetch cluster articles.'}</p>
         <button 
+          type="button"
           onClick={onClose} 
-          style={{ 
-            marginTop: '16px', 
-            padding: '6px 12px', 
-            border: '1px solid var(--accent-red)', 
-            background: 'transparent', 
-            color: 'var(--accent-red)', 
-            fontWeight: 'bold',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          style={dismissButtonStyle}
         >
           Dismiss
         </button>
@@ -84,24 +89,13 @@ export default function ClusterDetails({ clusterId, onClose }: ClusterDetailsPro
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.3s ease-out' }}>
       {/* Detail header action metadata */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="mono-font" style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent-red)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <span className="mono-font eyebrow-red">
           Coverage Detail
         </span>
         <button 
+          type="button"
           onClick={onClose} 
-          className="mono-font"
-          style={{ 
-            background: 'transparent', 
-            border: 'none', 
-            color: 'var(--text-secondary)', 
-            cursor: 'pointer', 
-            fontSize: '11px',
-            fontWeight: 'bold',
-            textTransform: 'uppercase',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
+          className="mono-font close-btn"
         >
           <span>✕ Close</span>
         </button>
@@ -127,7 +121,7 @@ export default function ClusterDetails({ clusterId, onClose }: ClusterDetailsPro
 
           {/* List of articles */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 className="mono-font" style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h3 className="mono-font eyebrow-gray">
               Grouped Coverage ({cluster.articles.length} Snippets)
             </h3>
             <div className="articles-grid" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

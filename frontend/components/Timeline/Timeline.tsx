@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TimelineItem from './TimelineItem';
 import { TimelineCluster } from '../../lib/api';
-import { TimelineListSkeleton } from '../Skeleton/SkeletonLoader';
+import { TimelineListSkeleton } from '../Skeleton/TimelineListSkeleton';
 
 interface TimelineProps {
   items: TimelineCluster[];
@@ -13,10 +13,13 @@ interface TimelineProps {
 export default function Timeline({ items, isLoading, selectedClusterId, onSelectCluster }: TimelineProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4; // 4 items per page fits perfectly without long scrolling
+  const [prevItemsLength, setPrevItemsLength] = useState(items.length);
 
-  useEffect(() => {
+  // Sync state on prop changes during render to avoid extra re-renders
+  if (items.length !== prevItemsLength) {
+    setPrevItemsLength(items.length);
     setCurrentPage(1);
-  }, [items.length]);
+  }
 
   if (isLoading) {
     return <TimelineListSkeleton />;
@@ -45,48 +48,28 @@ export default function Timeline({ items, isLoading, selectedClusterId, onSelect
               }}
             >
               <button
+                type="button"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev: number) => Math.max(prev - 1, 1))}
                 className="mono-font page-btn"
                 style={{
-                  height: '30px',
-                  padding: '0 12px',
-                  background: 'var(--surface-color)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
-                  boxSizing: 'border-box',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  opacity: currentPage === 1 ? 0.4 : 1,
-                  outline: 'none',
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  opacity: currentPage === 1 ? 0.4 : 1
                 }}
               >
                 ← PREV
               </button>
-              <span className="mono-font" style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+              <span className="mono-font" style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
                 PAGE {currentPage} OF {totalPages}
               </span>
               <button
+                type="button"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev: number) => Math.min(prev + 1, totalPages))}
                 className="mono-font page-btn"
                 style={{
-                  height: '30px',
-                  padding: '0 12px',
-                  background: 'var(--surface-color)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
-                  boxSizing: 'border-box',
-                  fontWeight: 'bold',
-                  fontSize: '10px',
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  opacity: currentPage === totalPages ? 0.4 : 1,
-                  outline: 'none',
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  opacity: currentPage === totalPages ? 0.4 : 1
                 }}
               >
                 NEXT →

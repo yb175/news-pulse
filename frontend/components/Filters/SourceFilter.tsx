@@ -5,6 +5,49 @@ interface SourceFilterProps {
   onChange: (sources: string[]) => void;
 }
 
+const filterBtnStyle: React.CSSProperties = {
+  height: '36px',
+  padding: '0 16px',
+  background: 'var(--surface-color)',
+  color: 'var(--text-primary)',
+  border: '1px solid var(--border-color)',
+  borderRadius: '4px',
+  boxSizing: 'border-box',
+  fontWeight: 600,
+  fontFamily: 'var(--font-sans)',
+  fontSize: '13px',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  transition: 'background-color 150ms ease, border-color 150ms ease'
+};
+
+const backdropBtnStyle: React.CSSProperties = {
+  position: 'fixed', 
+  top: 0, 
+  left: 0, 
+  right: 0, 
+  bottom: 0, 
+  zIndex: 998,
+  background: 'transparent',
+  border: 'none',
+  cursor: 'default'
+};
+
+const dropdownContainerStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: 'calc(100% + 8px)',
+  left: 0,
+  background: 'var(--surface-color)',
+  border: '1px solid var(--border-color)',
+  borderRadius: '4px',
+  padding: '12px',
+  zIndex: 999,
+  minWidth: '200px',
+  boxShadow: '2px 2px 0px var(--border-color)'
+};
+
 export default function SourceFilter({ selectedSources, onChange }: SourceFilterProps) {
   const sourcesList = ['BBC News', 'The Guardian', 'NPR'];
   const [isOpen, setIsOpen] = useState(false);
@@ -26,25 +69,9 @@ export default function SourceFilter({ selectedSources, onChange }: SourceFilter
   return (
     <div style={{ position: 'relative' }}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          height: '36px',
-          padding: '0 16px',
-          background: 'var(--surface-color)',
-          color: 'var(--text-primary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '4px',
-          boxSizing: 'border-box',
-          fontWeight: 600,
-          fontFamily: 'var(--font-sans)',
-          fontSize: '13px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          outline: 'none',
-          transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
+        style={filterBtnStyle}
         className="filter-btn"
       >
         <span>Sources: {getLabel()}</span>
@@ -55,23 +82,15 @@ export default function SourceFilter({ selectedSources, onChange }: SourceFilter
 
       {isOpen && (
         <>
-          <div 
+          {/* Accessible transparent backdrop button to close dropdown */}
+          <button 
+            type="button"
             onClick={() => setIsOpen(false)} 
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 998 }}
+            aria-label="Close sources filter dropdown"
+            style={backdropBtnStyle}
           />
-          <div style={{
-            position: 'absolute',
-            top: 'calc(100% + 8px)',
-            left: 0,
-            background: 'var(--surface-color)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '4px',
-            padding: '12px',
-            zIndex: 999,
-            minWidth: '200px',
-            boxShadow: '2px 2px 0px var(--border-color)'
-          }}>
-            <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '8px' }} className="mono-font">
+          <div style={dropdownContainerStyle}>
+            <h4 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '8px' }} className="mono-font">
               Select Sources
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

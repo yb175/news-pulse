@@ -1,33 +1,31 @@
 import React, { useState, useEffect } from 'react';
 
 interface HeaderProps {
-  lastUpdated: Date;
+  lastUpdated: Date | null;
 }
 
 export default function Header({ lastUpdated }: HeaderProps) {
-  const [timeString, setTimeString] = useState('Just now');
+  // Simple tick timer to force-render relative timestamp updates every 10 seconds
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    const updateTime = () => {
-      const diffMs = Date.now() - lastUpdated.getTime();
-      const diffSecs = Math.floor(diffMs / 1000);
-      const diffMins = Math.floor(diffSecs / 60);
-      
-      if (diffSecs < 30) {
-        setTimeString('Updated Just now');
-      } else if (diffSecs < 60) {
-        setTimeString('Updated < 1 min ago');
-      } else if (diffMins === 1) {
-        setTimeString('Updated 1 min ago');
-      } else {
-        setTimeString(`Updated ${diffMins} min ago`);
-      }
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 10000); // Update every 10s
+    const interval = setInterval(() => setTick(t => t + 1), 10000);
     return () => clearInterval(interval);
-  }, [lastUpdated]);
+  }, []);
+
+  // Compute relative time string on every render
+  const diffMs = lastUpdated ? Date.now() - lastUpdated.getTime() : 0;
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  
+  let timeString = 'Updated Just now';
+  if (diffSecs >= 30 && diffSecs < 60) {
+    timeString = 'Updated < 1 min ago';
+  } else if (diffSecs >= 60 && diffMins === 1) {
+    timeString = 'Updated 1 min ago';
+  } else if (diffSecs >= 60) {
+    timeString = `Updated ${diffMins} min ago`;
+  }
 
   return (
     <header style={{
@@ -70,7 +68,7 @@ export default function Header({ lastUpdated }: HeaderProps) {
         <span 
           className="mono-font" 
           style={{ 
-            fontSize: '11px', 
+            fontSize: '12px', 
             fontWeight: 'bold', 
             color: 'var(--text-primary)',
             letterSpacing: '0.05em'
@@ -78,23 +76,12 @@ export default function Header({ lastUpdated }: HeaderProps) {
         >
           BBC • NPR • GUARDIAN
         </span>
-        <span 
-          className="mono-font" 
-          style={{ 
-            fontSize: '10px', 
-            color: 'var(--text-secondary)',
-          }}
-        >
+        <span className="mono-font timestamp-text">
           {timeString}
         </span>
         <span 
-          className="mono-font" 
-          style={{ 
-            fontSize: '9px', 
-            color: 'var(--accent-red)',
-            fontWeight: 'bold',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
+          className="mono-font eyebrow-red"
+          style={{
             display: 'flex',
             alignItems: 'center',
             gap: '4px'

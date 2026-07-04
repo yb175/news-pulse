@@ -15,7 +15,6 @@ export default function Home() {
   const queryClient = useQueryClient();
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [selectedClusterId, setSelectedClusterId] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   // TanStack Query for Timelines
   const {
@@ -25,30 +24,19 @@ export default function Home() {
     error,
     refetch,
     isRefetching,
+    dataUpdatedAt,
   } = useQuery({
     queryKey: ['timeline', selectedSources],
     queryFn: () => fetchTimeline(7, selectedSources),
     staleTime: 5 * 60 * 1000, // 5 minutes fresh time
   });
 
-  // Update lastUpdated timestamp when timeline data loads
-  useEffect(() => {
-    if (timeline && timeline.length > 0) {
-      setLastUpdated(new Date());
-    }
-  }, [timeline]);
+  // Calculate active selected cluster during render (Derived State)
+  const activeClusterId = selectedClusterId && timeline.some(t => t.clusterId === selectedClusterId)
+    ? selectedClusterId
+    : (timeline[0]?.clusterId || null);
 
-  // Auto-select the first cluster when data loads or filters change
-  useEffect(() => {
-    if (timeline && timeline.length > 0) {
-      const currentIds = timeline.map((t) => t.clusterId);
-      if (!selectedClusterId || !currentIds.includes(selectedClusterId)) {
-        setSelectedClusterId(timeline[0].clusterId);
-      }
-    } else {
-      setSelectedClusterId(null);
-    }
-  }, [timeline, selectedClusterId]);
+  const lastUpdatedDate = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
 
   // Server-Sent Events (SSE) for instant sync on ingest
   useEffect(() => {
@@ -63,27 +51,21 @@ export default function Home() {
         
         // Invalidate active queries to trigger silent background refetch
         queryClient.invalidateQueries({ queryKey: ['timeline'] });
-        if (selectedClusterId) {
-          queryClient.invalidateQueries({ queryKey: ['cluster', selectedClusterId] });
-        }
+        queryClient.invalidateQueries({ queryKey: ['cluster'] });
       } catch (err) {
         console.error('[SSE] Failed to parse SSE event data:', err);
       }
     });
 
-    eventSource.onerror = (err) => {
-      console.error('[SSE] Connection error, will reconnect automatically:', err);
-    };
-
     return () => {
       console.log('[SSE] Closing connection');
       eventSource.close();
     };
-  }, [queryClient, selectedClusterId]);
+  }, [queryClient]);
 
   return (
     <div className="app-wrapper">
-      <Header lastUpdated={lastUpdated} />
+      <Header lastUpdated={lastUpdatedDate} />
       
       {/* Editorial Responsive Layout */}
       <main className="app-container" style={{ maxWidth: '1440px', width: '100%', margin: '0 auto' }}>
@@ -92,7 +74,7 @@ export default function Home() {
           className="timeline-sidebar"
           style={{ 
             padding: '20px 24px', 
-            borderRight: '2px solid var(--border-color)',
+            borderRight: '1px solid var(--border-color)',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px'
@@ -103,7 +85,7 @@ export default function Home() {
               Coverage Index
             </h2>
             {isRefetching && (
-              <span className="mono-font" style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+              <span className="mono-font" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                 syncing...
               </span>
             )}
@@ -118,7 +100,7 @@ export default function Home() {
           </div>
 
           {isError && (
-            <div style={{ color: 'var(--accent-red)', padding: '16px', border: '2px solid var(--accent-red)', borderRadius: '4px', background: '#FADBD8' }}>
+            <div style={{ color: 'var(--accent-red)', padding: '16px', border: '1px solid var(--accent-red)', borderRadius: '4px', background: '#FADBD8' }}>
               <p className="mono-font" style={{ fontWeight: 'bold', fontSize: '12px', marginBottom: '4px' }}>CONNECTION_ERROR</p>
               <p style={{ fontSize: '13px' }}>{error instanceof Error ? error.message : 'Failed to fetch timeline data.'}</p>
             </div>
@@ -127,7 +109,7 @@ export default function Home() {
           <Timeline
             items={timeline}
             isLoading={isLoading}
-            selectedClusterId={selectedClusterId}
+            selectedClusterId={activeClusterId}
             onSelectCluster={setSelectedClusterId}
           />
         </section>
@@ -135,7 +117,7 @@ export default function Home() {
         {/* Right column: Selected Cluster Details */}
         <section className="details-pane" style={{ padding: '20px 40px' }}>
           <ClusterDetails
-            clusterId={selectedClusterId}
+            clusterId={activeClusterId}
             onClose={() => setSelectedClusterId(null)}
           />
         </section>

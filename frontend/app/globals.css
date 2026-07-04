@@ -144,3 +144,103 @@ h1, h2, h3, h4, .serif-font {
   opacity: 0.15;
   margin: 6px 0;
 }
+
+/* Editorial Newspaper Design System Utilities */
+
+/* 1. Monospace metadata tags & badges */
+.metadata-tag {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.metadata-tag-dim {
+  background: var(--bg-color);
+  color: var(--text-secondary);
+}
+
+/* 2. Text elements & Eyebrow headers */
+.eyebrow-red {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--accent-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.eyebrow-gray {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.timestamp-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+/* 3. Interactive controls and buttons */
+.read-link {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 150ms ease;
+}
+
+.read-link:hover {
+  color: var(--accent-blue) !important;
+  text-decoration: underline !important;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 150ms ease;
+}
+
+.close-btn:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Focus and Outline Accessibility */
+button:focus, a:focus, input:focus, select:focus {
+  outline: 2px solid var(--accent-red);
+  outline-offset: 2px;
+}
+
+.page-btn {
+  height: 30px;
+  padding: 0 12px;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-weight: bold;
+  font-size: 11px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}

@@ -48,32 +48,10 @@ export default function TimelineItem({ item, isSelected, onSelect }: TimelineIte
 
       {/* Header Row: Date & Article Count Badge */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span 
-          className="mono-font" 
-          style={{ 
-            fontSize: '10px', 
-            fontWeight: 'bold', 
-            color: 'var(--accent-red)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}
-        >
+        <span className="mono-font eyebrow-red">
           {startDateStr}
         </span>
-        <span 
-          className="mono-font" 
-          style={{ 
-            fontSize: '9px', 
-            fontWeight: 'bold', 
-            padding: '2px 6px',
-            border: '1px solid var(--border-color)',
-            borderRadius: '2px',
-            background: 'var(--bg-color)',
-            color: 'var(--text-primary)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}
-        >
+        <span className="mono-font metadata-tag">
           {item.articleCount} {item.articleCount === 1 ? 'Article' : 'Articles'}
         </span>
       </div>
@@ -103,15 +81,7 @@ export default function TimelineItem({ item, isSelected, onSelect }: TimelineIte
         }}
       >
         {/* Time range */}
-        <span 
-          className="mono-font" 
-          style={{ 
-            fontSize: '10px', 
-            color: 'var(--text-secondary)',
-            whiteSpace: 'nowrap',
-            letterSpacing: '0.02em'
-          }}
-        >
+        <span className="mono-font timestamp-text">
           {startTimeStr} → {endTimeStr}
         </span>
 
@@ -120,35 +90,13 @@ export default function TimelineItem({ item, isSelected, onSelect }: TimelineIte
           {item.sources && item.sources.slice(0, 3).map((source) => (
             <span
               key={source}
-              className="mono-font"
-              style={{
-                fontSize: '9px',
-                fontWeight: 'bold',
-                padding: '2px 6px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '2px',
-                background: 'var(--bg-color)',
-                color: 'var(--text-primary)',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap'
-              }}
+              className="mono-font metadata-tag metadata-tag-dim"
             >
               {source.replace(/\s+News$/i, '')}
             </span>
           ))}
           {item.sources && item.sources.length > 3 && (
-            <span
-              className="mono-font"
-              style={{
-                fontSize: '9px',
-                fontWeight: 'bold',
-                padding: '2px 4px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '2px',
-                background: 'var(--bg-color)',
-                color: 'var(--text-secondary)'
-              }}
-            >
+            <span className="mono-font metadata-tag metadata-tag-dim">
               +{item.sources.length - 3}
             </span>
           )}

@@ -8,6 +8,7 @@ interface RefreshButtonProps {
 export default function RefreshButton({ onRefresh, isRefreshing }: RefreshButtonProps) {
   return (
     <button
+      type="button"
       onClick={() => onRefresh()}
       disabled={isRefreshing}
       style={{
@@ -26,8 +27,7 @@ export default function RefreshButton({ onRefresh, isRefreshing }: RefreshButton
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        outline: 'none',
-        transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+        transition: 'background-color 150ms ease, border-color 150ms ease'
       }}
       className="refresh-btn"
     >
