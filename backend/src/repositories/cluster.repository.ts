@@ -1,16 +1,87 @@
-// This repository manages data operations for news clusters.
-// In a real product implementation, replace these stubs with database queries.
+import prisma from '../lib/prisma';
 
 export class ClusterRepository {
-  async getAll(): Promise<any[]> {
-    // TODO: Implement database query to fetch all clusters containing their nested articles
-    console.log("ClusterRepository.getAll() stub called");
-    return [];
+  async getTimeline(cutoffDate?: Date, sources?: string[]): Promise<any[]> {
+    const where: any = {};
+    const articleFilter: any = {};
+
+    if (cutoffDate) {
+      articleFilter.publishedAt = {
+        gte: cutoffDate,
+      };
+    }
+
+    if (sources && sources.length > 0) {
+      articleFilter.OR = sources.map(source => ({
+        source: {
+          contains: source,
+          mode: 'insensitive',
+        },
+      }));
+    }
+
+    if (cutoffDate || (sources && sources.length > 0)) {
+      where.articles = {
+        some: articleFilter,
+      };
+    }
+
+    const includeArticlesWhere: any = {};
+    if (cutoffDate) {
+      includeArticlesWhere.publishedAt = {
+        gte: cutoffDate,
+      };
+    }
+
+    return prisma.cluster.findMany({
+      where,
+      include: {
+        articles: Object.keys(includeArticlesWhere).length > 0
+          ? { where: includeArticlesWhere }
+          : true,
+      },
+    });
   }
 
-  async getById(id: string): Promise<any | null> {
-    // TODO: Implement database query to fetch cluster details by ID including articles
-    console.log(`ClusterRepository.getById() stub called for ID: ${id}`);
-    return null;
+  async getClusters(): Promise<any[]> {
+    const clusters = await prisma.cluster.findMany({
+      include: {
+        articles: {
+          select: {
+            publishedAt: true,
+          },
+        },
+      },
+    });
+
+    return clusters.map(cluster => {
+      const articles = cluster.articles || [];
+      const articleCount = articles.length;
+
+      let timeRange = null;
+      if (articles.length > 0) {
+        const dates = articles.map(a => new Date(a.publishedAt).getTime());
+        timeRange = {
+          start: new Date(Math.min(...dates)).toISOString(),
+          end: new Date(Math.max(...dates)).toISOString(),
+        };
+      }
+
+      return {
+        id: cluster.id,
+        label: cluster.title,
+        articleCount,
+        timeRange,
+      };
+    });
+  }
+
+  async getClusterDetails(id: string): Promise<any | null> {
+    return prisma.cluster.findUnique({
+      where: { id },
+      include: {
+        articles: true,
+      },
+    });
   }
 }

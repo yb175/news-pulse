@@ -3,6 +3,7 @@ import cors from 'cors';
 import timelineRouter from './routes/timeline.routes';
 import clusterRouter from './routes/cluster.routes';
 import ingestRouter from './routes/ingest.routes';
+import { errorHandler } from './middleware/error.middleware';
 
 const app = express();
 
@@ -23,5 +24,8 @@ app.get('/health', (req, res) => {
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint Not Found' });
 });
+
+// Centralized Error Handler
+app.use(errorHandler);
 
 export default app;
