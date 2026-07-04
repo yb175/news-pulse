@@ -102,7 +102,8 @@ class ArticleNormalizer:
         if dt.tzinfo is not None:
             dt_utc = dt.astimezone(timezone.utc).replace(tzinfo=None)
         else:
-            dt_utc = dt
+            # Explicitly normalize timezone-less (naive) datetime to UTC
+            dt_utc = dt.replace(tzinfo=timezone.utc).astimezone(timezone.utc).replace(tzinfo=None)
 
         return ArticleModel(
             title=cleaned_title,

@@ -143,3 +143,14 @@ def test_raw_rss_item_object_normalization():
     assert normalized.url == "https://example.com/raw"
     assert normalized.source == "Raw Source"
     assert normalized.summary == "Raw Summary"
+
+def test_missing_source():
+    normalizer = ArticleNormalizer()
+    raw = {
+        "title": "Valid Title",
+        "url": "https://example.com/valid",
+        "published_at": "Sat, 04 Jul 2026 08:00:00 GMT",
+    }
+    with pytest.raises(ValueError) as exc:
+        normalizer.normalize(raw)
+    assert "source" in str(exc.value)

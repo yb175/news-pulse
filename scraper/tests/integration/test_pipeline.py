@@ -27,6 +27,7 @@ def test_pipeline_execution(mock_get, mock_get_urls, mock_get_clusters, mock_ens
       </channel>
     </rss>
     """
+    mock_response.text = "<html><body><article><h1>Integrate Article</h1><p>This is the extracted body.</p></article></body></html>"
     mock_get.return_value = mock_response
 
     pipeline = NewsPipeline()

@@ -6,7 +6,7 @@ from utils.logger import logger
 from models import ArticleModel
 
 class ArticleFetcher:
-    def __init__(self, max_retries: int = 3, timeout: int = REQUEST_TIMEOUT, user_agent: str = USER_AGENT, backoff_factor: float = 0.0):
+    def __init__(self, max_retries: int = 3, timeout: int = REQUEST_TIMEOUT, user_agent: str = USER_AGENT, backoff_factor: float = 0.5):
         self.max_retries = max_retries
         self.timeout = timeout
         self.headers = {"User-Agent": user_agent}
@@ -25,7 +25,7 @@ class ArticleFetcher:
                 response = requests.get(url, headers=self.headers, timeout=self.timeout, allow_redirects=True)
                 
                 # Check status code
-                if response.status_code == 200:
+                if 200 <= response.status_code < 300:
                     return response.text
                 
                 # If 5xx, it's transient, so retry
@@ -35,17 +35,24 @@ class ArticleFetcher:
                         logger.error(f"Failed to fetch {url} after {self.max_retries} retries due to status {response.status_code}.")
                         response.raise_for_status()
                 else:
-                    # 4xx or other status codes are non-transient, raise immediately
-                    logger.error(f"Non-transient HTTP error {response.status_code} for URL {url}.")
+                    # 3xx, 4xx or other status codes are non-transient, raise immediately
+                    logger.error(f"Non-transient HTTP status {response.status_code} for URL {url}.")
                     response.raise_for_status()
+                    # Fallback raise in case raise_for_status doesn't raise (e.g. 3xx)
+                    raise requests.exceptions.HTTPError(f"HTTP Status {response.status_code}", response=response)
                     
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and 500 <= e.response.status_code < 600:
+                    logger.error(f"Transient server error exhausted all retries for URL {url}: {e}")
+                else:
+                    logger.error(f"Non-transient HTTP error for URL {url}: {e}")
+                raise e
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-                logger.warning(f"Transient connection/timeout error for URL {url}: {e}")
                 if retries >= self.max_retries:
-                    logger.error(f"Failed to fetch {url} after {self.max_retries} retries due to exception: {e}")
+                    logger.error(f"Transient connection/timeout error exhausted all retries for URL {url}: {e}")
                     raise e
+                logger.warning(f"Transient connection/timeout error for URL {url}: {e}")
             except requests.exceptions.RequestException as e:
-                # Any other RequestException (e.g. HTTPError 4xx, DNS/MaxRetryError) is non-transient
                 logger.error(f"Non-transient request exception for URL {url}: {e}")
                 raise e
 

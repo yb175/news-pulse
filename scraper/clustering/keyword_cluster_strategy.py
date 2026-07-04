@@ -45,15 +45,19 @@ class KeywordClusterStrategy(ClusterStrategy):
                 logger.info(f"No matching cluster for '{article.title}'. Creating new cluster.")
                 topic_label = article.title.strip()
                 
+                cluster_id = None
                 if writer:
-                    cluster_id = writer.get_or_create_cluster(topic_label, summary=f"Cluster for {topic_label}")
+                    try:
+                        cluster_id = writer.get_or_create_cluster(topic_label, summary=f"Cluster for {topic_label}")
+                    except Exception as e:
+                        logger.error(f"Failed to create/get cluster for '{topic_label}' due to transient database error: {e}")
                 else:
                     import uuid
                     cluster_id = str(uuid.uuid4())
                 
-                article.cluster_id = cluster_id
-                
-                new_cluster = ClusterModel(id=cluster_id, title=topic_label, summary=f"Cluster for {topic_label}")
-                all_clusters.append(new_cluster)
+                if cluster_id:
+                    article.cluster_id = cluster_id
+                    new_cluster = ClusterModel(id=cluster_id, title=topic_label, summary=f"Cluster for {topic_label}")
+                    all_clusters.append(new_cluster)
                 
         return articles

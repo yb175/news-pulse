@@ -42,7 +42,7 @@ Below is the Class Diagram representing the architecture of the News Ingestion P
 ### Clustering & Persistence
 * **`ClusterStrategy`** *(Interface)*: Defines `cluster_articles(articles, existing_clusters, writer=None) -> List[ArticleModel]`.
 * **`KeywordClusterStrategy`**: Clusters articles by calculating Jaccard similarity on keyword token sets. New clusters are created on demand.
-* **`DatabaseWriter`**: Saves processed data to PostgreSQL. The `get_or_create_cluster` method uses transaction rollback block retries to handle duplicate cluster creation conflicts under high concurrency safely.
+* **`DatabaseWriter`**: Saves processed data to PostgreSQL. The `get_or_create_cluster` method handles duplicate cluster creation conflicts with a transaction rollback retry mechanism under high concurrency safely.
 * **`DatabaseRepository`**: Queries PostgreSQL to load previously processed URLs and clusters into memory.
 
 ---

@@ -11,7 +11,7 @@ class ArticleExtractor:
 
     def extract(self, article: ArticleModel) -> ArticleModel:
         logger.info(f"Extracting full content for: {article.title}")
-        html = self.fetcher.fetch(article.url)
+        article, html = self.fetcher.fetch_article(article)
         if html:
             extracted = self.parser.extract_article(html)
             article.body = extracted["body"]

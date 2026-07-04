@@ -25,7 +25,7 @@ class NewsPipeline:
         self.extractor = ArticleExtractor()
         self.repository = DatabaseRepository()
         self.writer = DatabaseWriter()
-        self.deduplicator = Deduplicator(URLDeduplicationStrategy())
+        self.deduplicator = Deduplicator()
         self.clusterer = KeywordClusterStrategy()
 
     def run(self) -> Dict[str, Any]:
@@ -62,25 +62,24 @@ class NewsPipeline:
 
         # 3. Deduplicate
         logger.info("Stage 3: Deduplicating similar articles")
-        existing_urls = self.repository.get_existing_urls() if self.repository else []
+        existing_urls = self.repository.get_existing_urls()
         self.deduplicator.set_strategy(URLDeduplicationStrategy(existing_urls))
         deduplicated_articles = self.deduplicator.filter_duplicates(extracted_articles)
 
         # 4. Clustering
         logger.info("Stage 4: Organizing articles into clusters")
-        existing_clusters = self.repository.get_existing_clusters() if self.repository else []
+        existing_clusters = self.repository.get_existing_clusters()
         clustered_articles = self.clusterer.cluster_articles(deduplicated_articles, existing_clusters, self.writer)
         
         # 5. Persistence
         logger.info("Stage 5: Storing processed articles and clusters to database")
         persisted_count = 0
-        if self.writer:
-            for article in clustered_articles:
-                try:
-                    self.writer.write_article(article)
-                    persisted_count += 1
-                except Exception as e:
-                    logger.error(f"Failed to save article '{article.title}': {e}")
+        for article in clustered_articles:
+            try:
+                self.writer.write_article(article)
+                persisted_count += 1
+            except Exception as e:
+                logger.error(f"Failed to save article '{article.title}': {e}")
         
         return {
             "status": "success",

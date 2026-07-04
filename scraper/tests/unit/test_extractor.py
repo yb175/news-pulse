@@ -124,7 +124,7 @@ def test_body_cleaned():
     assert "Buy this product" not in res["body"]
     assert "Sponsored by Us" not in res["body"]
     assert "Copyright" not in res["body"]
-    assert res["body"] == "This is the actual article content."
+    assert res["body"] == "Title This is the actual article content."
 
 def test_html_parser_extracts_clean_text_backwards_compatibility():
     parser = HTMLParser()

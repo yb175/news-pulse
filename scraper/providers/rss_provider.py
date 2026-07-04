@@ -4,6 +4,7 @@ import feedparser
 from typing import List
 from models import RawRSSItem
 from utils.logger import logger
+from utils.constants import USER_AGENT
 
 class RSSProvider(ABC):
     def __init__(self, name: str, feed_url: str):
@@ -14,7 +15,7 @@ class RSSProvider(ABC):
         """Fetches and parses feed entries into RawRSSItem models."""
         logger.info(f"Fetching feed from {self.name} at {self.feed_url}...")
         try:
-            response = requests.get(self.feed_url, timeout=10)
+            response = requests.get(self.feed_url, headers={"User-Agent": USER_AGENT}, timeout=10)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.error(f"HTTP request failed for {self.name}: {e}")
@@ -37,7 +38,8 @@ class RSSProvider(ABC):
                     summary=entry.get("summary", ""),
                     url=entry.get("link", ""),
                     published_at=entry.get("published", ""),
-                    source=self.name
+                    source=self.name,
+                    author=entry.get("author")
                 )
             )
         return articles

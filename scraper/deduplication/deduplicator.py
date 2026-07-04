@@ -4,7 +4,7 @@ from utils.logger import logger
 from .strategy import DeduplicationStrategy
 
 class Deduplicator:
-    def __init__(self, strategy: DeduplicationStrategy):
+    def __init__(self, strategy: DeduplicationStrategy = None):
         self.strategy = strategy
 
     def set_strategy(self, strategy: DeduplicationStrategy):

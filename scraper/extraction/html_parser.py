@@ -27,10 +27,8 @@ class HTMLParser:
                 for child in list(h1_el.contents):
                     if isinstance(child, str):
                         title_parts.append(child)
-                        child.extract()
                     elif child.name not in ["p", "div", "article", "section"]:
                         title_parts.append(child.get_text())
-                        child.decompose()
                 title = "".join(title_parts)
             elif soup.title:
                 title = soup.title.string or ""
