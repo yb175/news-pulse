@@ -24,7 +24,6 @@ export default function Home() {
     error,
     refetch,
     isRefetching,
-    dataUpdatedAt,
   } = useQuery({
     queryKey: ['timeline', selectedSources],
     queryFn: () => fetchTimeline(7, selectedSources),
@@ -36,7 +35,13 @@ export default function Home() {
     ? selectedClusterId
     : (timeline[0]?.clusterId || null);
 
-  const lastUpdatedDate = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
+  // Derive "last updated" from the most recent article endTime in the data.
+  // Using dataUpdatedAt (client fetch time) is misleading — it always shows "Just now" on every refresh.
+  // Instead, reflect when the actual content was last ingested/published.
+  const lastUpdatedDate = timeline.length > 0
+    ? new Date(Math.max(...timeline.map(t => new Date(t.endTime).getTime())))
+    : null;
+
 
   // Server-Sent Events (SSE) for instant sync on ingest
   useEffect(() => {
