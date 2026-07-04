@@ -6,6 +6,7 @@ export interface TimelineDTO {
   startTime: string;
   endTime: string;
   articleCount: number;
+  sources: string[];
 }
 
 export class TimelineService {
@@ -34,6 +35,8 @@ export class TimelineService {
       const startTime = new Date(Math.min(...publishedDates)).toISOString();
       const endTime = new Date(Math.max(...publishedDates)).toISOString();
       const articleCount = cluster.articles.length;
+      const sourcesSet = new Set<string>(cluster.articles.map((a: any) => a.source));
+      const sources = Array.from(sourcesSet);
 
       return {
         clusterId: cluster.id,
@@ -41,6 +44,7 @@ export class TimelineService {
         startTime,
         endTime,
         articleCount,
+        sources,
       };
     });
 

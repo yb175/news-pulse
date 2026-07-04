@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { IngestionJobRepository } from '../repositories/ingestion-job.repository';
+import { SseService } from '../services/sse.service';
 
 export class PythonRunner {
   private repository = new IngestionJobRepository();
@@ -58,7 +59,10 @@ export class PythonRunner {
           const match = logs.match(/'articlesFound':\s*(\d+)/) || 
                         logs.match(/articlesFound:\s*(\d+)/) ||
                         logs.match(/'articles_count':\s*(\d+)/) ||
-                        logs.match(/"articles_count":\s*(\d+)/);
+                        logs.match(/"articles_count":\s*(\d+)/) ||
+                        logs.match(/'articles_persisted':\s*(\d+)/) ||
+                        logs.match(/"articles_persisted":\s*(\d+)/) ||
+                        logs.match(/'articles_fetched':\s*(\d+)/);
           if (match) {
             count = parseInt(match[1], 10);
           } else {
@@ -66,6 +70,7 @@ export class PythonRunner {
             count = 0;
           }
           await this.repository.updateStatus(jobId, 'COMPLETED', count, logs);
+          SseService.broadcast('news-updated', { count, jobId });
         } else {
           await this.repository.updateStatus(jobId, 'FAILED', 0, logs);
         }

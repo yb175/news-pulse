@@ -130,5 +130,39 @@ describe('ClusterService', () => {
       expect(result).not.toBeNull();
       expect(result!.articles).toEqual([]);
     });
+
+    it('should sanitize article summaries to clean plain text', async () => {
+      const mockCluster = { id: 'c1', title: 'Test Cluster' };
+      const mockArticles = [
+        {
+          id: 'a1',
+          title: 'Article with HTML',
+          bodySnippet: '<ul><li><p>South Africa 45-21 England</p></li></ul>\n<p>What a fabulous occasion...</p>\n<a href="http://example.com">Continue reading...</a>',
+          source: 'BBC',
+          url: 'http://bbc.com',
+          publishedAt: new Date('2026-07-04T10:00:00Z'),
+        },
+        {
+          id: 'a2',
+          title: 'Article with Entities and Links',
+          bodySnippet: 'The &ldquo;Springboks&rdquo; won &amp; defeated their opponent. <a href="http://link.com">Read original</a>',
+          source: 'NPR',
+          url: 'http://npr.org',
+          publishedAt: new Date('2026-07-04T11:00:00Z'),
+        }
+      ];
+
+      mockGetClusterDetails.mockResolvedValue(mockCluster);
+      mockFindByCluster.mockResolvedValue(mockArticles);
+
+      const result = await service.getClusterDetails('c1');
+
+      expect(result).not.toBeNull();
+      // a2 has newer date (11:00) so it's first
+      expect(result!.articles[0].summary).toBe('The “Springboks” won & defeated their opponent. Read original');
+      
+      // a1 has older date (10:00) so it's second
+      expect(result!.articles[1].summary).toBe('• South Africa 45-21 England\n\nWhat a fabulous occasion...');
+    });
   });
 });

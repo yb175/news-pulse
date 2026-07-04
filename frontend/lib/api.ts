@@ -6,6 +6,7 @@ export interface TimelineCluster {
   startTime: string;
   endTime: string;
   articleCount: number;
+  sources: string[];
 }
 
 export interface ClusterSummary {

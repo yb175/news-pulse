@@ -97,6 +97,9 @@ class DatabaseWriter:
 
     def write_article(self, article: ArticleModel):
         logger.info(f"Writing article '{article.title}' to PostgreSQL...")
+        if not article.id:
+            import uuid
+            article.id = str(uuid.uuid4())
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cur:

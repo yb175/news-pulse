@@ -5,7 +5,9 @@ const router = Router();
 const controller = new IngestController();
 
 router.route('/trigger')
-  .post(controller.triggerIngestion)
+  .post((req, res) => {
+    res.status(403).json({ error: 'Ingestion can only be triggered by the backend scheduler.' });
+  })
   .all((req, res) => {
     res.status(405).json({ error: 'Method Not Allowed' });
   });
