@@ -47,6 +47,8 @@ Create this file in the `backend/` directory to construct the container:
 
 ```dockerfile
 # 1. Base Image with Node.js and Python
+# NOTE: Alpine ships with OpenSSL 3.x. The binaryTargets field in schema.prisma
+# must include "linux-musl-openssl-3.0.x" so Prisma bundles the correct engine.
 FROM nikolaik/python-nodejs:python3.10-nodejs18-alpine
 
 WORKDIR /app
