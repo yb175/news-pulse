@@ -25,7 +25,7 @@ class ArticleFetcher:
                 response = requests.get(url, headers=self.headers, timeout=self.timeout, allow_redirects=True)
                 
                 # Check status code
-                if 200 <= response.status_code < 300:
+                if response.status_code == 200:
                     return response.text
                 
                 # If 5xx, it's transient, so retry

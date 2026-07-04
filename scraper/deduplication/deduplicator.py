@@ -1,11 +1,11 @@
 from typing import List
 from models.article import ArticleModel
 from utils.logger import logger
-from .strategy import DeduplicationStrategy
+from .strategy import DeduplicationStrategy, URLDeduplicationStrategy
 
 class Deduplicator:
     def __init__(self, strategy: DeduplicationStrategy = None):
-        self.strategy = strategy
+        self.strategy = strategy or URLDeduplicationStrategy()
 
     def set_strategy(self, strategy: DeduplicationStrategy):
         self.strategy = strategy
