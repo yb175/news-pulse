@@ -1,0 +1,100 @@
+{
+  "title": "Bootstrap news-pulse repository memory",
+  "summary": "Initial baseline memory for the news-pulse monorepo setup, including PostgreSQL DB, Python scraper, Express API, and Next.js frontend.",
+  "creates": {
+    "components": [
+      {
+        "id": "component.repository",
+        "name": "Repository Root",
+        "code_anchor": "package.json"
+      },
+      {
+        "id": "component.db",
+        "name": "Shared Database Layer",
+        "code_anchor": "db/prisma/schema.prisma"
+      },
+      {
+        "id": "component.scraper",
+        "name": "Python Ingestion Scraper",
+        "code_anchor": "scraper/main.py"
+      },
+      {
+        "id": "component.backend",
+        "name": "Express REST API Backend",
+        "code_anchor": "backend/src/app.ts"
+      },
+      {
+        "id": "component.frontend",
+        "name": "Next.js Web Frontend",
+        "code_anchor": "frontend/app/page.tsx"
+      }
+    ],
+    "flows": [
+      {
+        "id": "flow.ingestion",
+        "name": "Ingestion Pipeline Flow",
+        "touches": ["component.backend", "component.scraper", "component.db"]
+      },
+      {
+        "id": "flow.timeline_feed",
+        "name": "Timeline Feed View Flow",
+        "touches": ["component.frontend", "component.backend", "component.db"]
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim.postgres_db",
+        "kind": "fact",
+        "truth": "code_verified",
+        "intent": "intended",
+        "about": "component.db",
+        "text": "The repository uses a local PostgreSQL database container and Prisma ORM.",
+        "code_anchors": [
+          {
+            "file": "db/prisma/schema.prisma"
+          }
+        ]
+      },
+      {
+        "id": "claim.python_scraper",
+        "kind": "fact",
+        "truth": "code_verified",
+        "intent": "intended",
+        "about": "component.scraper",
+        "text": "The scraper is implemented in Python and groups news using Keyword Strategy.",
+        "code_anchors": [
+          {
+            "file": "scraper/clustering/keyword_strategy.py",
+            "symbol": "KeywordStrategy"
+          }
+        ]
+      },
+      {
+        "id": "claim.backend_api",
+        "kind": "fact",
+        "truth": "code_verified",
+        "intent": "intended",
+        "about": "component.backend",
+        "text": "Exposes /api/timeline, /api/clusters, and /api/ingest REST endpoints.",
+        "code_anchors": [
+          {
+            "file": "backend/src/app.ts"
+          }
+        ]
+      },
+      {
+        "id": "claim.frontend_ui",
+        "kind": "fact",
+        "truth": "code_verified",
+        "intent": "intended",
+        "about": "component.frontend",
+        "text": "Implements Next.js App Router with custom styling theme in globals.css.",
+        "code_anchors": [
+          {
+            "file": "frontend/app/globals.css"
+          }
+        ]
+      }
+    ]
+  }
+}

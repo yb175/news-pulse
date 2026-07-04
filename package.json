@@ -1,0 +1,25 @@
+{
+  "name": "news-pulse-monorepo",
+  "version": "1.0.0",
+  "description": "News Pulse monorepo template with Turborepo",
+  "private": true,
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "db"
+  ],
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:seed": "npm run seed --workspace=db",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}
