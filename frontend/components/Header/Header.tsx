@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SOURCES_LIST } from '../Filters/SourceFilter';
+import { SOURCES_LIST } from '../../lib/constants';
 
 interface HeaderProps {
   lastUpdated: Date | null;

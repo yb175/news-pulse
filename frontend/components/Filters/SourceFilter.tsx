@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SOURCES_LIST } from '../../lib/constants';
 
 interface SourceFilterProps {
   selectedSources: string[];
@@ -47,8 +48,6 @@ const dropdownContainerStyle: React.CSSProperties = {
   minWidth: '200px',
   boxShadow: '2px 2px 0px var(--border-color)'
 };
-
-export const SOURCES_LIST = ['BBC News', 'The Guardian', 'NPR'];
 
 export default function SourceFilter({ selectedSources, onChange }: SourceFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
