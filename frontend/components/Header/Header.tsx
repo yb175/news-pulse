@@ -16,18 +16,26 @@ export default function Header({ lastUpdated, isRefetching = false }: HeaderProp
   }, []);
 
   // Compute relative time string on every render
-  const diffMs = lastUpdated ? Date.now() - lastUpdated.getTime() : 0;
-  const diffSecs = Math.floor(diffMs / 1000);
-  const diffMins = Math.floor(diffSecs / 60);
-  
-  let timeString = 'Updated Just now';
-  if (diffSecs >= 30 && diffSecs < 60) {
+  // Only meaningful when we actually have a timestamp
+  const diffMs = lastUpdated ? Date.now() - lastUpdated.getTime() : null;
+  const diffSecs = diffMs !== null ? Math.floor(diffMs / 1000) : null;
+  const diffMins = diffSecs !== null ? Math.floor(diffSecs / 60) : null;
+
+  let timeString = '';
+  if (diffSecs === null) {
+    timeString = ''; // no data yet — shimmer will show instead
+  } else if (diffSecs < 30) {
+    timeString = 'Updated Just now';
+  } else if (diffSecs < 60) {
     timeString = 'Updated < 1 min ago';
-  } else if (diffSecs >= 60 && diffMins === 1) {
+  } else if (diffMins === 1) {
     timeString = 'Updated 1 min ago';
-  } else if (diffSecs >= 60) {
+  } else {
     timeString = `Updated ${diffMins} min ago`;
   }
+
+  // Show shimmer when: initial load (no timestamp yet) OR background refetch in progress
+  const showShimmer = isRefetching || !lastUpdated;
 
   return (
     <header style={{
@@ -78,7 +86,7 @@ export default function Header({ lastUpdated, isRefetching = false }: HeaderProp
         >
           {SOURCES_LIST.map(s => s.replace(/ News$/, '').toUpperCase()).join(' • ')}
         </span>
-        {isRefetching ? (
+        {showShimmer ? (
           <span
             className="shimmer"
             style={{
