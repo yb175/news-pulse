@@ -2,7 +2,6 @@ import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { IngestionJobRepository } from '../repositories/ingestion-job.repository';
-import { JobStatus } from '@prisma/client';
 
 export class PythonRunner {
   private repository = new IngestionJobRepository();
@@ -28,7 +27,7 @@ export class PythonRunner {
     }
 
     // Transition job status to RUNNING in database
-    await this.repository.updateStatus(jobId, JobStatus.RUNNING, 0);
+    await this.repository.updateStatus(jobId, 'RUNNING', 0);
 
     let logs = '';
 
@@ -41,28 +40,37 @@ export class PythonRunner {
     });
 
     child.on('error', async (error: any) => {
-      console.error(`[PythonRunner] Job process error:`, error);
-      logs += `\nError: ${error.message}`;
-      await this.repository.updateStatus(jobId, JobStatus.FAILED, 0, logs);
+      try {
+        console.error(`[PythonRunner] Job process error:`, error);
+        logs += `\nError: ${error.message}`;
+        await this.repository.updateStatus(jobId, 'FAILED', 0, logs);
+      } catch (err) {
+        console.error('[PythonRunner] Failed to update job status on process error:', err);
+      }
     });
 
     child.on('close', async (code) => {
-      console.log(`[PythonRunner] Job process closed with code ${code}`);
-      if (code === 0) {
-        // Parse stats or default to count
-        let count = 0;
-        const match = logs.match(/'articlesFound':\s*(\d+)/) || 
-                      logs.match(/articlesFound:\s*(\d+)/) ||
-                      logs.match(/'articles_count':\s*(\d+)/) ||
-                      logs.match(/"articles_count":\s*(\d+)/);
-        if (match) {
-          count = parseInt(match[1], 10);
+      try {
+        console.log(`[PythonRunner] Job process closed with code ${code}`);
+        if (code === 0) {
+          // Parse stats or default to count
+          let count = 0;
+          const match = logs.match(/'articlesFound':\s*(\d+)/) || 
+                        logs.match(/articlesFound:\s*(\d+)/) ||
+                        logs.match(/'articles_count':\s*(\d+)/) ||
+                        logs.match(/"articles_count":\s*(\d+)/);
+          if (match) {
+            count = parseInt(match[1], 10);
+          } else {
+            console.warn('[PythonRunner] Output format mismatch; could not parse article count. Defaulting to 0.');
+            count = 0;
+          }
+          await this.repository.updateStatus(jobId, 'COMPLETED', count, logs);
         } else {
-          count = 6; // default fallback if successful
+          await this.repository.updateStatus(jobId, 'FAILED', 0, logs);
         }
-        await this.repository.updateStatus(jobId, JobStatus.COMPLETED, count, logs);
-      } else {
-        await this.repository.updateStatus(jobId, JobStatus.FAILED, 0, logs);
+      } catch (err) {
+        console.error('[PythonRunner] Failed to update job status on process close:', err);
       }
     });
   }

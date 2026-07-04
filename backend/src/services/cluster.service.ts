@@ -1,4 +1,5 @@
 import { ClusterRepository } from '../repositories/cluster.repository';
+import { ArticleRepository } from '../repositories/article.repository';
 
 export interface ClusterSummaryDTO {
   id: string;
@@ -25,9 +26,31 @@ export interface ClusterDetailsDTO {
 
 export class ClusterService {
   private clusterRepository = new ClusterRepository();
+  private articleRepository = new ArticleRepository();
 
   async getAllClusters(): Promise<ClusterSummaryDTO[]> {
-    const summaries = await this.clusterRepository.getClusters();
+    const clusters = await this.clusterRepository.getClusters();
+
+    const summaries: ClusterSummaryDTO[] = clusters.map(cluster => {
+      const articles = cluster.articles || [];
+      const articleCount = articles.length;
+
+      let timeRange = null;
+      if (articles.length > 0) {
+        const dates = articles.map((a: any) => new Date(a.publishedAt).getTime());
+        timeRange = {
+          start: new Date(Math.min(...dates)).toISOString(),
+          end: new Date(Math.max(...dates)).toISOString(),
+        };
+      }
+
+      return {
+        id: cluster.id,
+        label: cluster.title,
+        articleCount,
+        timeRange,
+      };
+    });
 
     // Sort summaries by timeRange.start DESC.
     // Clusters with no articles (no timeRange) are pushed to the end.
@@ -47,7 +70,9 @@ export class ClusterService {
       return null;
     }
 
-    const articles = (cluster.articles || [])
+    const rawArticles = await this.articleRepository.findByCluster(id);
+
+    const articles = rawArticles
       .map((article: any) => ({
         id: article.id,
         title: article.title,

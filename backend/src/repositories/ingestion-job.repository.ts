@@ -12,15 +12,23 @@ export class IngestionJobRepository {
     });
   }
 
-  async updateStatus(id: string, status: JobStatus, articlesFound: number, logs?: string): Promise<any> {
+  async updateStatus(
+    id: string,
+    status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED',
+    articlesFound: number,
+    logs?: string
+  ): Promise<any> {
     const data: any = {
-      status,
+      status: status as JobStatus,
       articlesFound,
     };
     if (logs !== undefined) {
       data.logs = logs;
     }
-    if (status === JobStatus.COMPLETED || status === JobStatus.FAILED) {
+    if (status === 'RUNNING') {
+      data.startedAt = new Date();
+    }
+    if (status === 'COMPLETED' || status === 'FAILED') {
       data.completedAt = new Date();
     }
 

@@ -6,12 +6,12 @@ This directory contains the Express-based backend API for the News Pulse applica
 
 ## 1. Architectural Abstractions
 
-The backend is built following a clean **3-Tier Layered Architecture** to achieve strict separation of concerns, testability, and framework independence.
+The backend is built following a clean **4-Layer Architecture** to achieve strict separation of concerns, testability, and framework independence.
 
 > [!TIP]
 > **How to render diagrams:** If your Markdown reader does not render Mermaid diagrams natively, copy the block contents below and paste them into the online [Mermaid Live Editor](https://mermaid.live).
 
-### 3-Tier Layered Architecture Flow
+### 4-Layer Architecture Flow
 ```mermaid
 graph TD
     Client["Client (Frontend / Pollers)"] -->|HTTP Request| Router["1. Express Router (Routes mapping)"]
@@ -242,7 +242,11 @@ npm run test
 ```
 
 ### Database Seeding
-Populate the development database with mock news articles and clusters:
+Populate the development database with mock news articles and clusters (run this command from the monorepo root directory):
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/newspulse?schema=public" npm run db:seed
+```
+Alternatively, run the seed script directly from the `backend/` directory via Prisma CLI:
+```bash
+npx prisma db seed
 ```

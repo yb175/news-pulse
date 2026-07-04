@@ -15,9 +15,9 @@ export class TimelineService {
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     // Fetch clusters from repository
-    const clusters = await this.clusterRepository.getTimeline(cutoffDate, sources);
+    const clusters = await this.clusterRepository.getTimeline(cutoffDate);
 
-    // Apply source filter: Only include clusters containing articles from those sources
+    // Apply source filter in Service Layer: Only include clusters containing articles from those sources
     let filteredClusters = clusters;
     if (sources && sources.length > 0) {
       const lowercaseSources = sources.map(s => s.toLowerCase());
@@ -29,26 +29,20 @@ export class TimelineService {
     }
 
     // Map entities into DTOs and aggregate article metadata
-    const dtos: TimelineDTO[] = filteredClusters
-      .map(cluster => {
-        if (!cluster.articles || cluster.articles.length === 0) {
-          return null;
-        }
+    const dtos: TimelineDTO[] = filteredClusters.map(cluster => {
+      const publishedDates = cluster.articles.map((a: any) => new Date(a.publishedAt).getTime());
+      const startTime = new Date(Math.min(...publishedDates)).toISOString();
+      const endTime = new Date(Math.max(...publishedDates)).toISOString();
+      const articleCount = cluster.articles.length;
 
-        const publishedDates = cluster.articles.map((a: any) => new Date(a.publishedAt).getTime());
-        const startTime = new Date(Math.min(...publishedDates)).toISOString();
-        const endTime = new Date(Math.max(...publishedDates)).toISOString();
-        const articleCount = cluster.articles.length;
-
-        return {
-          clusterId: cluster.id,
-          label: cluster.title,
-          startTime,
-          endTime,
-          articleCount,
-        };
-      })
-      .filter((dto): dto is TimelineDTO => dto !== null);
+      return {
+        clusterId: cluster.id,
+        label: cluster.title,
+        startTime,
+        endTime,
+        articleCount,
+      };
+    });
 
     // Order timeline by: startTime DESC
     dtos.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());

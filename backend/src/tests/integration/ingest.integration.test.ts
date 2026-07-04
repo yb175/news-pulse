@@ -1,7 +1,15 @@
 import request from 'supertest';
 import app from '../../app';
 import prisma from '../../lib/prisma';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vitest';
+
+vi.mock('../../jobs/python-runner', () => {
+  return {
+    PythonRunner: class {
+      launch = vi.fn().mockResolvedValue(undefined);
+    },
+  };
+});
 
 describe('Ingest Trigger API Integration', () => {
   beforeEach(async () => {
@@ -12,6 +20,10 @@ describe('Ingest Trigger API Integration', () => {
   afterEach(async () => {
     // Clean DB
     await prisma.ingestionJob.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
 
   it('POST /api/ingest/trigger should return 200 with jobId and queued status, and insert PENDING/RUNNING job in DB', async () => {
@@ -29,6 +41,6 @@ describe('Ingest Trigger API Integration', () => {
 
     expect(job).not.toBeNull();
     // It can be PENDING (queued) or RUNNING depending on background execution timing
-    expect(['PENDING', 'RUNNING', 'COMPLETED', 'FAILED']).toContain(job!.status);
+    expect(['PENDING', 'RUNNING']).toContain(job!.status);
   });
 });

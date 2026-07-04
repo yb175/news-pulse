@@ -9,8 +9,12 @@ export class TimelineController {
     try {
       let days = 7;
       if (req.query.days !== undefined) {
-        const parsedDays = parseInt(req.query.days as string, 10);
-        if (isNaN(parsedDays) || parsedDays <= 0) {
+        const daysStr = String(req.query.days);
+        if (!/^\d+$/.test(daysStr)) {
+          return next(new HttpError(400, 'Invalid days parameter.'));
+        }
+        const parsedDays = parseInt(daysStr, 10);
+        if (parsedDays <= 0) {
           return next(new HttpError(400, 'Invalid days parameter.'));
         }
         days = parsedDays;

@@ -20,7 +20,7 @@ describe('ClusterRepository', () => {
   });
 
   describe('getTimeline', () => {
-    it('should call findMany with correct date and source filters', async () => {
+    it('should call findMany with correct date filters', async () => {
       const mockClusters = [
         {
           id: 'c1',
@@ -31,21 +31,13 @@ describe('ClusterRepository', () => {
       vi.mocked(prisma.cluster.findMany).mockResolvedValue(mockClusters as any);
 
       const cutoffDate = new Date('2026-07-04T00:00:00Z');
-      const result = await repository.getTimeline(cutoffDate, ['BBC']);
+      const result = await repository.getTimeline(cutoffDate);
 
       expect(prisma.cluster.findMany).toHaveBeenCalledWith({
         where: {
           articles: {
             some: {
               publishedAt: { gte: cutoffDate },
-              OR: [
-                {
-                  source: {
-                    contains: 'BBC',
-                    mode: 'insensitive',
-                  },
-                },
-              ],
             },
           },
         },
@@ -62,7 +54,7 @@ describe('ClusterRepository', () => {
   });
 
   describe('getClusters', () => {
-    it('should call findMany and calculate summary metadata', async () => {
+    it('should call findMany with articles publishedAt select', async () => {
       const mockClusters = [
         {
           id: 'c1',
@@ -85,24 +77,15 @@ describe('ClusterRepository', () => {
         },
       });
 
-      expect(result[0]).toEqual({
-        id: 'c1',
-        label: 'Cluster One',
-        articleCount: 2,
-        timeRange: {
-          start: new Date('2026-07-04T10:00:00Z').toISOString(),
-          end: new Date('2026-07-04T12:00:00Z').toISOString(),
-        },
-      });
+      expect(result).toEqual(mockClusters);
     });
   });
 
   describe('getClusterDetails', () => {
-    it('should call findUnique with correct ID and includes', async () => {
+    it('should call findUnique with correct ID and no includes', async () => {
       const mockCluster = {
         id: 'c1',
         title: 'Cluster One',
-        articles: [],
       };
       vi.mocked(prisma.cluster.findUnique).mockResolvedValue(mockCluster as any);
 
@@ -110,7 +93,6 @@ describe('ClusterRepository', () => {
 
       expect(prisma.cluster.findUnique).toHaveBeenCalledWith({
         where: { id: 'c1' },
-        include: { articles: true },
       });
       expect(result).toEqual(mockCluster);
     });

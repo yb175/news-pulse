@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import prisma from '../../lib/prisma';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
 
 describe('Ingest Status API Integration', () => {
   beforeEach(async () => {
@@ -12,6 +12,10 @@ describe('Ingest Status API Integration', () => {
   afterEach(async () => {
     // Clean DB
     await prisma.ingestionJob.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
 
   it('GET /api/ingest/status/:jobId with invalid UUID should return 400', async () => {

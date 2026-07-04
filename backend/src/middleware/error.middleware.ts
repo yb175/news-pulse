@@ -9,7 +9,7 @@ export class HttpError extends Error {
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
   const status = err.status || 500;
-  const message = err.message || 'Internal Server Error.';
+  const message = status === 500 ? 'Internal Server Error.' : (err.message || 'Internal Server Error.');
 
   if (status === 500) {
     console.error('[Centralized Error Handler] Unexpected system error:', err);

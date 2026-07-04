@@ -1,7 +1,15 @@
 import request from 'supertest';
 import app from '../../app';
 import prisma from '../../lib/prisma';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vitest';
+
+vi.mock('../../jobs/python-runner', () => {
+  return {
+    PythonRunner: class {
+      launch = vi.fn().mockResolvedValue(undefined);
+    },
+  };
+});
 
 describe('Express Routing Integration', () => {
   beforeEach(async () => {
@@ -15,6 +23,10 @@ describe('Express Routing Integration', () => {
     await prisma.article.deleteMany({});
     await prisma.cluster.deleteMany({});
     await prisma.ingestionJob.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
 
   describe('Route Registration (Success Responses)', () => {

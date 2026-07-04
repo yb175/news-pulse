@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import prisma from '../../lib/prisma';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
 
 describe('Timeline API Integration', () => {
   beforeEach(async () => {
@@ -14,6 +14,10 @@ describe('Timeline API Integration', () => {
     // Clean DB
     await prisma.article.deleteMany({});
     await prisma.cluster.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
 
   it('GET /api/timeline should return expected response with sorted clusters', async () => {
