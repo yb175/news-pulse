@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, deploy ]
+  pull_request:
+    branches: [ main, master, deploy ]
+
+jobs:
+  lint-and-typecheck:
+    name: Code Quality & Build Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      # Install Node monorepo packages
+      - name: Install Node Dependencies
+        run: npm install
+
+      # Verify Prisma client generation and DB compilation
+      - name: Build Database & Generate Prisma Client
+        run: |
+          npm run db:generate
+          npm run typecheck --workspace=db
+
+      # Verify Express backend compiles
+      - name: Build Backend
+        run: npm run build --workspace=backend
+
+      # Verify Next.js frontend compiles
+      - name: Build Frontend
+        run: npm run build --workspace=frontend
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
+
+      # Install Python pip requirements and execute pytest
+      - name: Install Scraper Dependencies
+        run: |
+          pip install -r scraper/requirements.txt
+
+      - name: Run Scraper Tests
+        run: |
+          cd scraper
+          pytest
