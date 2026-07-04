@@ -1,31 +1,52 @@
 import { ClusterRepository } from '../repositories/cluster.repository';
 
-// This service manages timeline queries.
-// In a real product implementation, it queries the database through repositories.
+export interface TimelineDTO {
+  clusterId: string;
+  label: string;
+  startTime: string;
+  endTime: string;
+  articleCount: number;
+}
 
 export class TimelineService {
   private clusterRepository = new ClusterRepository();
 
-  async getTimeline(days: number = 7, sources?: string[]) {
-    console.log(`TimelineService.getTimeline() stub called. Days: ${days}, Sources: ${sources}`);
+  async getTimeline(days: number = 7, sources?: string[]): Promise<TimelineDTO[]> {
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const mockTimeline = [
-      {
-        clusterId: "c1",
-        label: "Apple WWDC Keynote and AI Features",
-        startTime: new Date(Date.now() - 3600000 * 5).toISOString(),
-        endTime: new Date(Date.now() - 3600000 * 1).toISOString(),
-        articleCount: 3
-      },
-      {
-        clusterId: "c2",
-        label: "Global Green Energy Production Records",
-        startTime: new Date(Date.now() - 3600000 * 8).toISOString(),
-        endTime: new Date(Date.now() - 3600000 * 4).toISOString(),
-        articleCount: 2
-      }
-    ];
+    // Fetch clusters from repository
+    const clusters = await this.clusterRepository.getTimeline(cutoffDate);
 
-    return mockTimeline;
+    // Apply source filter in Service Layer: Only include clusters containing articles from those sources
+    let filteredClusters = clusters;
+    if (sources && sources.length > 0) {
+      const lowercaseSources = sources.map(s => s.toLowerCase());
+      filteredClusters = clusters.filter(cluster =>
+        cluster.articles && cluster.articles.some((article: any) =>
+          lowercaseSources.some(src => article.source.toLowerCase().includes(src))
+        )
+      );
+    }
+
+    // Map entities into DTOs and aggregate article metadata
+    const dtos: TimelineDTO[] = filteredClusters.map(cluster => {
+      const publishedDates = cluster.articles.map((a: any) => new Date(a.publishedAt).getTime());
+      const startTime = new Date(Math.min(...publishedDates)).toISOString();
+      const endTime = new Date(Math.max(...publishedDates)).toISOString();
+      const articleCount = cluster.articles.length;
+
+      return {
+        clusterId: cluster.id,
+        label: cluster.title,
+        startTime,
+        endTime,
+        articleCount,
+      };
+    });
+
+    // Order timeline by: startTime DESC
+    dtos.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+
+    return dtos;
   }
 }

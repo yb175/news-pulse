@@ -1,83 +1,92 @@
-// This service manages logic for querying news clusters.
-// In a real product implementation, it queries clusters and groups from repositories.
-// For this scaffolding template, it returns mock cluster data for UI demo.
+import { ClusterRepository } from '../repositories/cluster.repository';
+import { ArticleRepository } from '../repositories/article.repository';
+
+export interface ClusterSummaryDTO {
+  id: string;
+  label: string;
+  articleCount: number;
+  timeRange: {
+    start: string;
+    end: string;
+  } | null;
+}
+
+export interface ClusterDetailsDTO {
+  id: string;
+  label: string;
+  articles: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    source: string;
+    url: string;
+    publishedAt: string;
+  }>;
+}
 
 export class ClusterService {
-  async getAllClusters() {
-    console.log("ClusterService.getAllClusters() stub called");
-    return [
-      {
-        id: "c1",
-        label: "Apple WWDC Keynote and AI Features",
-        articleCount: 2,
-        timeRange: {
-          start: new Date(Date.now() - 3600000 * 5).toISOString(),
-          end: new Date(Date.now() - 3600000 * 1).toISOString()
-        }
-      },
-      {
-        id: "c2",
-        label: "Global Green Energy Production Records",
-        articleCount: 2,
-        timeRange: {
-          start: new Date(Date.now() - 3600000 * 8).toISOString(),
-          end: new Date(Date.now() - 3600000 * 4).toISOString()
-        }
+  private clusterRepository = new ClusterRepository();
+  private articleRepository = new ArticleRepository();
+
+  async getAllClusters(): Promise<ClusterSummaryDTO[]> {
+    const clusters = await this.clusterRepository.getClusters();
+
+    const summaries: ClusterSummaryDTO[] = clusters.map(cluster => {
+      const articles = cluster.articles || [];
+      const articleCount = articles.length;
+
+      let timeRange = null;
+      if (articles.length > 0) {
+        const dates = articles.map((a: any) => new Date(a.publishedAt).getTime());
+        timeRange = {
+          start: new Date(Math.min(...dates)).toISOString(),
+          end: new Date(Math.max(...dates)).toISOString(),
+        };
       }
-    ];
+
+      return {
+        id: cluster.id,
+        label: cluster.title,
+        articleCount,
+        timeRange,
+      };
+    });
+
+    // Sort summaries by timeRange.start DESC.
+    // Clusters with no articles (no timeRange) are pushed to the end.
+    summaries.sort((a: ClusterSummaryDTO, b: ClusterSummaryDTO) => {
+      if (!a.timeRange && !b.timeRange) return 0;
+      if (!a.timeRange) return 1;
+      if (!b.timeRange) return -1;
+      return new Date(b.timeRange.start).getTime() - new Date(a.timeRange.start).getTime();
+    });
+
+    return summaries;
   }
 
-  async getClusterDetails(id: string) {
-    console.log(`ClusterService.getClusterDetails() stub called for ID: ${id}`);
-    
-    if (id === "c1") {
-      return {
-        id: "c1",
-        label: "Apple WWDC Keynote and AI Features",
-        articles: [
-          {
-            id: "a1",
-            title: "Apple unveils new AI features at WWDC",
-            summary: "Apple announced a major integration of artificial intelligence tools across iOS and macOS at its developer conference.",
-            source: "BBC News",
-            url: "https://example.com/apple-ai",
-            publishedAt: new Date(Date.now() - 3600000 * 4).toISOString()
-          },
-          {
-            id: "a2",
-            title: "Siri gets major update in upcoming iOS release",
-            summary: "Siri receives an intelligence upgrade, enabling deep context-aware answers and action triggers.",
-            source: "The Guardian",
-            url: "https://example.com/siri-upgrade",
-            publishedAt: new Date(Date.now() - 3600000 * 3).toISOString()
-          }
-        ]
-      };
-    } else if (id === "c2") {
-      return {
-        id: "c2",
-        label: "Global Green Energy Production Records",
-        articles: [
-          {
-            id: "a3",
-            title: "Solar output hits new record highs across western Europe",
-            summary: "High sunshine volumes and new panel installations pushed solar energy production to record numbers.",
-            source: "BBC News",
-            url: "https://example.com/solar-record",
-            publishedAt: new Date(Date.now() - 3600000 * 7).toISOString()
-          },
-          {
-            id: "a4",
-            title: "Wind and Solar Surge: Green Grid Targets Achieved Ahead of Schedule",
-            summary: "Renewable energy deployment in North America has overtaken grid targets by two years.",
-            source: "The Guardian",
-            url: "https://example.com/solar-surge-milestone",
-            publishedAt: new Date(Date.now() - 3600000 * 6).toISOString()
-          }
-        ]
-      };
+  async getClusterDetails(id: string): Promise<ClusterDetailsDTO | null> {
+    const cluster = await this.clusterRepository.getClusterDetails(id);
+    if (!cluster) {
+      return null;
     }
 
-    return null;
+    const rawArticles = await this.articleRepository.findByCluster(id);
+
+    const articles = rawArticles
+      .map((article: any) => ({
+        id: article.id,
+        title: article.title,
+        summary: article.bodySnippet,
+        source: article.source,
+        url: article.url,
+        publishedAt: new Date(article.publishedAt).toISOString(),
+      }))
+      .sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+    return {
+      id: cluster.id,
+      label: cluster.title,
+      articles,
+    };
   }
 }

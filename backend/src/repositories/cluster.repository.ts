@@ -1,16 +1,48 @@
-// This repository manages data operations for news clusters.
-// In a real product implementation, replace these stubs with database queries.
+import prisma from '../lib/prisma';
 
 export class ClusterRepository {
-  async getAll(): Promise<any[]> {
-    // TODO: Implement database query to fetch all clusters containing their nested articles
-    console.log("ClusterRepository.getAll() stub called");
-    return [];
+  async getTimeline(cutoffDate?: Date): Promise<any[]> {
+    const where: any = {};
+    const includeArticlesWhere: any = {};
+
+    if (cutoffDate) {
+      where.articles = {
+        some: {
+          publishedAt: {
+            gte: cutoffDate,
+          },
+        },
+      };
+      includeArticlesWhere.publishedAt = {
+        gte: cutoffDate,
+      };
+    }
+
+    return prisma.cluster.findMany({
+      where,
+      include: {
+        articles: Object.keys(includeArticlesWhere).length > 0
+          ? { where: includeArticlesWhere }
+          : true,
+      },
+    });
   }
 
-  async getById(id: string): Promise<any | null> {
-    // TODO: Implement database query to fetch cluster details by ID including articles
-    console.log(`ClusterRepository.getById() stub called for ID: ${id}`);
-    return null;
+  async getClusters(): Promise<any[]> {
+    return prisma.cluster.findMany({
+      include: {
+        articles: {
+          select: {
+            publishedAt: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getClusterDetails(id: string): Promise<any | null> {
+    return prisma.cluster.findUnique({
+      where: { id },
+    });
   }
 }
