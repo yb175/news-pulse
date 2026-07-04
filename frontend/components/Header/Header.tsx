@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SOURCES_LIST } from '../Filters/SourceFilter';
 
 interface HeaderProps {
   lastUpdated: Date | null;
@@ -74,7 +75,7 @@ export default function Header({ lastUpdated }: HeaderProps) {
             letterSpacing: '0.05em'
           }}
         >
-          BBC • NPR • GUARDIAN
+          {SOURCES_LIST.map(s => s.replace(/ News$/, '').toUpperCase()).join(' • ')}
         </span>
         <span className="mono-font timestamp-text">
           {timeString}

@@ -48,8 +48,9 @@ const dropdownContainerStyle: React.CSSProperties = {
   boxShadow: '2px 2px 0px var(--border-color)'
 };
 
+export const SOURCES_LIST = ['BBC News', 'The Guardian', 'NPR'];
+
 export default function SourceFilter({ selectedSources, onChange }: SourceFilterProps) {
-  const sourcesList = ['BBC News', 'The Guardian', 'NPR'];
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSource = (source: string) => {
@@ -62,7 +63,7 @@ export default function SourceFilter({ selectedSources, onChange }: SourceFilter
 
   const getLabel = () => {
     if (selectedSources.length === 0) return 'All Sources';
-    if (selectedSources.length === sourcesList.length) return 'All Sources';
+    if (selectedSources.length === SOURCES_LIST.length) return 'All Sources';
     return `${selectedSources.length} Selected`;
   };
 
@@ -94,7 +95,7 @@ export default function SourceFilter({ selectedSources, onChange }: SourceFilter
               Select Sources
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {sourcesList.map(source => {
+              {SOURCES_LIST.map((source: string) => {
                 const isActive = selectedSources.includes(source);
                 return (
                   <label 

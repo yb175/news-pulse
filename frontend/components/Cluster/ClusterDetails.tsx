@@ -86,7 +86,7 @@ export default function ClusterDetails({ clusterId, onClose }: ClusterDetailsPro
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.3s ease-out' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.15s ease-out' }}>
       {/* Detail header action metadata */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span className="mono-font eyebrow-red">

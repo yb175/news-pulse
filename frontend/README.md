@@ -93,13 +93,14 @@ The UI uses a **Broadsheet/Newspaper** Brutalist visual identity, staying away f
 frontend/
 ├── app/
 │   ├── globals.css         # Typography, layout classes, and design tokens
-│   ├── layout.tsx          # Root font imports (Libre Baskerville, Inter)
+│   ├── layout.tsx          # Root font imports (Libre Baskerville, Inter, JetBrains Mono)
 │   ├── page.tsx            # Main page column structure & SSE connection
 │   └── providers.tsx       # TanStack QueryClient wrapping
 ├── components/
 │   ├── Cluster/
-│   │   ├── ArticleCard.tsx # Visually secondary news cards
-│   │   └── ClusterDetails.tsx # Selected topic detail container
+│   │   ├── ArticleCard.tsx   # Visually secondary news cards
+│   │   ├── ClusterDetails.tsx # Selected topic detail container
+│   │   └── ClusterHeader.tsx # Cluster detail header metadata
 │   ├── Filters/
 │   │   └── SourceFilter.tsx # Multi-source selection dropdown
 │   ├── Header/
@@ -107,10 +108,17 @@ frontend/
 │   ├── Refresh/
 │   │   └── RefreshButton.tsx # Manual sync feed action
 │   ├── Skeleton/
-│   │   └── SkeletonLoader.tsx # Editorial shimmer blocks
+│   │   ├── SkeletonLoader.tsx      # Editorial shimmer blocks
+│   │   ├── TimelineCardSkeleton.tsx # Timeline card loading skeleton
+│   │   └── TimelineListSkeleton.tsx # Timeline list loading skeleton
 │   └── Timeline/
-│       ├── Timeline.tsx    # Left-hand timeline column & pagination
-│       └── TimelineItem.tsx # Curated cluster item card with left red accent bar
+│       ├── Timeline.tsx      # Left-hand timeline column & pagination
+│       ├── TimelineItem.tsx  # Curated cluster item card with left red accent bar
+│       └── TimelineLegend.tsx # Timeline source legend
+├── hooks/
+│   ├── useCluster.ts       # Cluster details query hook
+│   ├── usePolling.ts       # Polling/refetch orchestration hook
+│   └── useTimeline.ts      # Timeline query + pagination hook
 └── lib/
     └── api.ts              # Fetch requests & typescript interfaces
 ```

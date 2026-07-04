@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Libre_Baskerville } from 'next/font/google';
+import { Inter, Libre_Baskerville, JetBrains_Mono } from 'next/font/google';
 import QueryProvider from './providers';
 import './globals.css';
 
@@ -16,6 +16,12 @@ const libreBaskerville = Libre_Baskerville({
   display: 'swap',
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'News Pulse | Real-Time News Clustering & Timelines',
   description: 'Track news timelines, clusters, and aggregations parsed from multiple RSS sources with premium micro-interactions.',
@@ -27,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${libreBaskerville.variable}`}>
+    <html lang="en" className={`${inter.variable} ${libreBaskerville.variable} ${jetbrainsMono.variable}`}>
       <body>
         <QueryProvider>
           {children}
