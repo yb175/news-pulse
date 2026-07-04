@@ -65,7 +65,7 @@ export default function Home() {
 
   return (
     <div className="app-wrapper">
-      <Header lastUpdated={lastUpdatedDate} />
+      <Header lastUpdated={lastUpdatedDate} isRefetching={isRefetching} />
       
       {/* Editorial Responsive Layout */}
       <main className="app-container" style={{ maxWidth: '1440px', width: '100%', margin: '0 auto' }}>
@@ -109,6 +109,7 @@ export default function Home() {
           <Timeline
             items={timeline}
             isLoading={isLoading}
+            isRefetching={isRefetching}
             selectedClusterId={activeClusterId}
             onSelectCluster={setSelectedClusterId}
           />

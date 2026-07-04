@@ -3,9 +3,10 @@ import { SOURCES_LIST } from '../../lib/constants';
 
 interface HeaderProps {
   lastUpdated: Date | null;
+  isRefetching?: boolean;
 }
 
-export default function Header({ lastUpdated }: HeaderProps) {
+export default function Header({ lastUpdated, isRefetching = false }: HeaderProps) {
   // Simple tick timer to force-render relative timestamp updates every 10 seconds
   const [, setTick] = useState(0);
 
@@ -77,9 +78,22 @@ export default function Header({ lastUpdated }: HeaderProps) {
         >
           {SOURCES_LIST.map(s => s.replace(/ News$/, '').toUpperCase()).join(' • ')}
         </span>
-        <span className="mono-font timestamp-text">
-          {timeString}
-        </span>
+        {isRefetching ? (
+          <span
+            className="shimmer"
+            style={{
+              display: 'inline-block',
+              width: '110px',
+              height: '11px',
+              borderRadius: '3px',
+              marginTop: '1px',
+            }}
+          />
+        ) : (
+          <span className="mono-font timestamp-text">
+            {timeString}
+          </span>
+        )}
         <span 
           className="mono-font eyebrow-red"
           style={{

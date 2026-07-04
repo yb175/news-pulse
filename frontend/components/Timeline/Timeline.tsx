@@ -6,11 +6,12 @@ import { TimelineListSkeleton } from '../Skeleton/TimelineListSkeleton';
 interface TimelineProps {
   items: TimelineCluster[];
   isLoading: boolean;
+  isRefetching?: boolean;
   selectedClusterId: string | null;
   onSelectCluster: (id: string) => void;
 }
 
-export default function Timeline({ items, isLoading, selectedClusterId, onSelectCluster }: TimelineProps) {
+export default function Timeline({ items, isLoading, isRefetching = false, selectedClusterId, onSelectCluster }: TimelineProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4; // 4 items per page fits perfectly without long scrolling
   const [prevItemsLength, setPrevItemsLength] = useState(items.length);
@@ -90,6 +91,24 @@ export default function Timeline({ items, isLoading, selectedClusterId, onSelect
         </>
       )}
       
+      {/* Shimmer overlay during background refetch — keeps existing cards visible */}
+      {isRefetching && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="shimmer"
+              style={{
+                height: '96px',
+                borderRadius: '4px',
+                opacity: 0.55,
+                animationDelay: `${i * 0.12}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Mobile/Tablet Horizontal Carousel Styling */}
       <style>{`
         .page-btn:hover:not(:disabled) {
