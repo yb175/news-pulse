@@ -23,4 +23,8 @@ export class IngestionService {
   async getJobStatus(jobId: string) {
     return this.repository.findById(jobId);
   }
+
+  async getLatestCompleted() {
+    return this.repository.getLatestCompleted();
+  }
 }

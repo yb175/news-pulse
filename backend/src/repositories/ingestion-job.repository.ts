@@ -43,4 +43,11 @@ export class IngestionJobRepository {
       where: { id },
     });
   }
+
+  async getLatestCompleted(): Promise<any | null> {
+    return prisma.ingestionJob.findFirst({
+      where: { status: JobStatus.COMPLETED },
+      orderBy: { completedAt: 'desc' },
+    });
+  }
 }

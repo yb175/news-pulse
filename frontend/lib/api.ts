@@ -88,3 +88,15 @@ export async function checkJobStatus(jobId: string): Promise<IngestJobResponse> 
   }
   return res.json();
 }
+
+export interface LatestJobResponse {
+  completedAt: string | null;
+}
+
+export async function fetchLatestJob(): Promise<LatestJobResponse> {
+  const res = await fetch(`${API_BASE_URL}/ingest/latest`, { cache: 'no-store' });
+  if (!res.ok) {
+    throw new Error('Failed to fetch latest job status');
+  }
+  return res.json();
+}

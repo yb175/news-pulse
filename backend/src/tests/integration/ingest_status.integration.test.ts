@@ -95,4 +95,58 @@ describe('Ingest Status API Integration', () => {
     expect(response.body.status).toBe('failed');
     expect(response.body.error).toBe('Scraper failed to connect to database');
   });
+
+  describe('GET /api/ingest/latest', () => {
+    it('should return null when no completed ingestion jobs exist', async () => {
+      const response = await request(app).get('/api/ingest/latest');
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ completedAt: null });
+    });
+
+    it('should return the completedAt of the latest completed ingestion job', async () => {
+      // 1. Create an older completed job
+      await prisma.ingestionJob.create({
+        data: {
+          status: 'COMPLETED',
+          startedAt: new Date(Date.now() - 3600000),
+          completedAt: new Date(Date.now() - 3500000),
+          articlesFound: 5,
+        },
+      });
+
+      // 2. Create the latest completed job
+      const latestCompletedTime = new Date(Date.now() - 60000);
+      const latestJob = await prisma.ingestionJob.create({
+        data: {
+          status: 'COMPLETED',
+          startedAt: new Date(Date.now() - 120000),
+          completedAt: latestCompletedTime,
+          articlesFound: 10,
+        },
+      });
+
+      // 3. Create a running job (which has status RUNNING and should be ignored)
+      await prisma.ingestionJob.create({
+        data: {
+          status: 'RUNNING',
+          startedAt: new Date(),
+          articlesFound: 0,
+        },
+      });
+
+      // 4. Create a failed job (which has status FAILED and should be ignored)
+      await prisma.ingestionJob.create({
+        data: {
+          status: 'FAILED',
+          startedAt: new Date(),
+          completedAt: new Date(),
+          articlesFound: 0,
+        },
+      });
+
+      const response = await request(app).get('/api/ingest/latest');
+      expect(response.status).toBe(200);
+      expect(response.body.completedAt).toBe(latestCompletedTime.toISOString());
+    });
+  });
 });

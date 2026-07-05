@@ -4,6 +4,7 @@ dist/
 build/
 .next/
 out/
+.turbo/
 .npm
 npm-debug.log*
 yarn-debug.log*
