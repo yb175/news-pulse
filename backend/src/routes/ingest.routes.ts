@@ -12,6 +12,12 @@ router.route('/trigger')
     res.status(405).json({ error: 'Method Not Allowed' });
   });
 
+router.route('/latest')
+  .get(controller.getLatestCompletedJob)
+  .all((req, res) => {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  });
+
 router.route('/status/:jobId')
   .get(controller.getJobStatus)
   .all((req, res) => {

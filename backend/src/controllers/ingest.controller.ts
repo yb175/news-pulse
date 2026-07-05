@@ -67,4 +67,15 @@ export class IngestController {
       next(error);
     }
   };
+
+  getLatestCompletedJob = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const job = await this.service.getLatestCompleted();
+      return res.status(200).json({
+        completedAt: job ? job.completedAt?.toISOString() || null : null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

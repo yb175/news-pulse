@@ -7,7 +7,7 @@ import Timeline from '../components/Timeline/Timeline';
 import SourceFilter from '../components/Filters/SourceFilter';
 import ClusterDetails from '../components/Cluster/ClusterDetails';
 import RefreshButton from '../components/Refresh/RefreshButton';
-import { fetchTimeline } from '../lib/api';
+import { fetchTimeline, fetchLatestJob } from '../lib/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -22,11 +22,22 @@ export default function Home() {
     isLoading,
     isError,
     error,
-    refetch,
-    isRefetching,
+    refetch: refetchTimeline,
+    isRefetching: isRefetchingTimeline,
   } = useQuery({
     queryKey: ['timeline', selectedSources],
     queryFn: () => fetchTimeline(7, selectedSources),
+    staleTime: 5 * 60 * 1000, // 5 minutes fresh time
+  });
+
+  // TanStack Query for latest ingestion job status
+  const {
+    data: latestJob = null,
+    refetch: refetchLatestJob,
+    isRefetching: isRefetchingLatestJob,
+  } = useQuery({
+    queryKey: ['latestJob'],
+    queryFn: fetchLatestJob,
     staleTime: 5 * 60 * 1000, // 5 minutes fresh time
   });
 
@@ -35,13 +46,17 @@ export default function Home() {
     ? selectedClusterId
     : (timeline[0]?.clusterId || null);
 
-  // Derive "last updated" from the most recent article endTime in the data.
-  // Using dataUpdatedAt (client fetch time) is misleading — it always shows "Just now" on every refresh.
-  // Instead, reflect when the actual content was last ingested/published.
-  const lastUpdatedDate = timeline.length > 0
-    ? new Date(Math.max(...timeline.map(t => new Date(t.endTime).getTime())))
+  // Derive "last updated" from the completedAt timestamp of the most recent completed ingestion job.
+  const lastUpdatedDate = latestJob?.completedAt
+    ? new Date(latestJob.completedAt)
     : null;
 
+  const isSyncing = isRefetchingTimeline || isRefetchingLatestJob;
+
+  const handleRefresh = async () => {
+    refetchTimeline();
+    refetchLatestJob();
+  };
 
   // Server-Sent Events (SSE) for instant sync on ingest
   useEffect(() => {
@@ -57,6 +72,7 @@ export default function Home() {
         // Invalidate active queries to trigger silent background refetch
         queryClient.invalidateQueries({ queryKey: ['timeline'] });
         queryClient.invalidateQueries({ queryKey: ['cluster'] });
+        queryClient.invalidateQueries({ queryKey: ['latestJob'] });
       } catch (err) {
         console.error('[SSE] Failed to parse SSE event data:', err);
       }
@@ -70,7 +86,7 @@ export default function Home() {
 
   return (
     <div className="app-wrapper">
-      <Header lastUpdated={lastUpdatedDate} isRefetching={isRefetching} />
+      <Header lastUpdated={lastUpdatedDate} isRefetching={isSyncing} />
       
       {/* Editorial Responsive Layout */}
       <main className="app-container" style={{ maxWidth: '1440px', width: '100%', margin: '0 auto' }}>
@@ -89,7 +105,7 @@ export default function Home() {
             <h2 className="mono-font" style={{ fontSize: '12px', letterSpacing: '0.05em', color: 'var(--accent-red)', textTransform: 'uppercase' }}>
               Coverage Index
             </h2>
-            {isRefetching && (
+            {isSyncing && (
               <span className="mono-font" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                 syncing...
               </span>
@@ -98,7 +114,7 @@ export default function Home() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <RefreshButton onRefresh={refetch} isRefreshing={isRefetching} />
+              <RefreshButton onRefresh={handleRefresh} isRefreshing={isSyncing} />
               <SourceFilter selectedSources={selectedSources} onChange={setSelectedSources} />
             </div>
             <div className="thin-hr" style={{ margin: 0 }} />
@@ -114,7 +130,7 @@ export default function Home() {
           <Timeline
             items={timeline}
             isLoading={isLoading}
-            isRefetching={isRefetching}
+            isRefetching={isSyncing}
             selectedClusterId={activeClusterId}
             onSelectCluster={setSelectedClusterId}
           />
