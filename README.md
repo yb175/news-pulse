@@ -14,7 +14,17 @@ News Pulse uses a decoupled architecture where the scraping pipeline, the backen
 
 ![System Architecture](./docs/architecture.png)
 
----
+### Design Note: Manual Refresh Trigger
+
+> The manual **"Refresh"** trigger is intentionally not exposed on the frontend.
+
+Since ingestion hits live RSS feeds and writes to a shared production database, exposing an unthrottled trigger to all users risked redundant scraper runs under concurrent clicks.
+
+**Instead:**
+- Ingestion runs on a **15-minute schedule** automatically
+- `POST /ingest/trigger` remains available for on-demand / testing use, but isn't wired to a public UI button
+- Live updates reach the frontend via **SSE**, with no user action required
+
 
 ## 2. Subsystem Architectures
 
