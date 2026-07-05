@@ -3,8 +3,21 @@ import { CleanupService } from '../services/cleanup.service';
 
 export function startCleanupJob(): { stop: () => void; trigger: () => Promise<void> } {
   const service = new CleanupService();
-  const cronExpression = process.env.CLEANUP_CRON || '0 * * * *';
-  const retentionHours = parseInt(process.env.NEWS_RETENTION_HOURS || '24', 10);
+
+  // Validate cron expression
+  let cronExpression = process.env.CLEANUP_CRON || '0 * * * *';
+  if (!cron.validate(cronExpression)) {
+    console.error(`[Cleanup] Invalid CLEANUP_CRON expression: "${cronExpression}". Falling back to default "0 * * * *".`);
+    cronExpression = '0 * * * *';
+  }
+
+  // Validate retention window config
+  const rawRetention = process.env.NEWS_RETENTION_HOURS || '24';
+  let retentionHours = parseInt(rawRetention, 10);
+  if (isNaN(retentionHours) || retentionHours <= 0) {
+    console.warn(`[Cleanup] Invalid NEWS_RETENTION_HOURS: "${rawRetention}". Must be a positive integer. Falling back to 24 hours.`);
+    retentionHours = 24;
+  }
 
   console.log(`[Cleanup] Cleanup job initialized with schedule: ${cronExpression}`);
 
@@ -25,8 +38,8 @@ export function startCleanupJob(): { stop: () => void; trigger: () => Promise<vo
     }
   }
 
-  // Schedule the cron task
-  const task = cron.schedule(cronExpression, runCleanup);
+  // Schedule the cron task with overlap prevention enabled
+  const task = cron.schedule(cronExpression, runCleanup, { noOverlap: true });
 
   return {
     stop: () => {
